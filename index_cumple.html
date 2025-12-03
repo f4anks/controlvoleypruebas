@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Voley - Cumpleañeros</title>
+    <!-- Carga de Tailwind CSS para el diseño moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configuración personalizada de Tailwind para colores y fuente -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'voley-blue': '#1e40af', // Azul fuerte (Blue 800)
+                        'voley-dark': '#1e3a8a', // Azul oscuro (Blue 900)
+                        'voley-light': '#eff6ff', // Azul muy claro (Blue 50)
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .voley-gradient {
+            background-image: linear-gradient(135deg, #1e40af, #3b82f6);
+        }
+    </style>
+</head>
+<body class="bg-voley-light font-sans min-h-screen flex flex-col">
+
+    <!-- Encabezado de la Aplicación -->
+    <header class="bg-voley-dark shadow-lg p-4 sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-white">
+                Control Voley <span class="text-voley-light text-xl">- Cumpleaños</span>
+            </h1>
+            <div class="flex items-center">
+                <span class="text-sm text-white/70 mr-4">Club: <span id="currentClubDisplay" class="font-semibold">Cargando...</span></span>
+                <!-- Botón de regreso al menú principal -->
+                <a href="index_menu.html" class="bg-voley-blue hover:bg-voley-blue/80 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-200 shadow-md">
+                    Regresar al Menú
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full">
+        
+        <div id="login-required" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md hidden" role="alert">
+            <p class="font-bold">Acceso Denegado</p>
+            <p>Necesitas iniciar sesión en el <span class="font-semibold">index.html</span> principal para acceder a los datos de los atletas.</p>
+        </div>
+        
+        <div id="birthday-view" class="hidden">
+            <!-- Título Dinámico -->
+            <h2 class="text-3xl font-extrabold text-voley-dark mb-6 border-b pb-2">
+                Cumpleañeros del mes de <span id="currentMonthName" class="text-voley-blue capitalize">...</span>
+            </h2>
+
+            <!-- Indicador de Carga/Estado -->
+            <p id="statusMessage" class="text-center p-4 text-lg text-gray-600 font-medium">Cargando datos de atletas...</p>
+
+            <!-- Contenedor de la Tabla -->
+            <div class="bg-white p-6 rounded-xl shadow-2xl overflow-x-auto border border-voley-blue/20">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-voley-light">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-voley-dark uppercase tracking-wider">Atleta</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-voley-dark uppercase tracking-wider">Día de Cumpleaños</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-voley-dark uppercase tracking-wider">Fecha Completa de Nacimiento</th>
+                        </tr>
+                    </thead>
+                    <tbody id="birthdaysTableBody" class="bg-white divide-y divide-gray-100">
+                        <!-- Las filas de cumpleaños se insertarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Script de Firebase y Lógica -->
+    <script type="module">
+        // Importaciones de Firebase SDK (v11.6.1)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, onSnapshot, collection, query, where, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Establecer nivel de log para depuración de Firestore
+        setLogLevel('Debug');
+
+        // --- Configuración de Firebase y Variables Globales ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const CLUB_ID_STORAGE_KEY = 'lvm_club_id'; 
+        
+        let firebaseConfig = {}; // Usaremos la configuración inyectada o la vacía si no está disponible.
+        
+        try {
+            if (typeof __firebase_config !== 'undefined') {
+                const injectedConfig = JSON.parse(__firebase_config);
+                if (injectedConfig && injectedConfig.apiKey) {
+                    firebaseConfig = injectedConfig;
+                }
+            }
+        } catch (e) {
+            console.error("Error al usar la configuración inyectada. Usando la configuración estática proporcionada.", e);
+        }
+
+        let app, db, auth;
+        let userId = null;
+        let isAuthReady = false; 
+        
+        // Inicializar el clubId con el valor persistente de localStorage
+        let currentClubId = localStorage.getItem(CLUB_ID_STORAGE_KEY); 
+
+        // Elementos de UI
+        const statusMessage = document.getElementById('statusMessage');
+        const loginRequired = document.getElementById('login-required');
+        const birthdayView = document.getElementById('birthday-view');
+        const currentClubDisplay = document.getElementById('currentClubDisplay');
+        const currentMonthNameElement = document.getElementById('currentMonthName');
+        
+        // --- Funciones de Utilidad ---
+
+        /**
+         * Obtiene el nombre del mes actual en español.
+         */
+        function getLocalizedMonthName() {
+            const date = new Date();
+            return date.toLocaleString('es-ES', { month: 'long' });
+        }
+
+        /**
+         * Verifica si una fecha de nacimiento cae en el mes actual.
+         * @param {string} dateOfBirthString - Fecha de nacimiento en formato "YYYY-MM-DD".
+         * @returns {boolean} True si cumple este mes.
+         */
+        function isBirthdayThisMonth(dateOfBirthString) {
+            if (!dateOfBirthString || typeof dateOfBirthString !== 'string' || dateOfBirthString.length < 10) return false;
+            
+            // La fecha de nacimiento es YYYY-MM-DD. Extraemos MM (mes).
+            // ParseInt(substring(5, 7)) -> MM (1 a 12)
+            const dobMonth = parseInt(dateOfBirthString.substring(5, 7), 10); 
+            
+            // Date().getMonth() es 0-indexado (0 = Enero, 11 = Diciembre).
+            const currentMonthIndex = new Date().getMonth() + 1; // Convertir a 1-indexado
+
+            return dobMonth === currentMonthIndex;
+        }
+
+        /**
+         * Extrae el día del mes de una fecha en formato "YYYY-MM-DD".
+         */
+        function getBirthdayDay(dateOfBirthString) {
+            if (!dateOfBirthString || typeof dateOfBirthString !== 'string' || dateOfBirthString.length < 10) return 'N/A';
+            
+            // Extraemos el día (DD)
+            return parseInt(dateOfBirthString.substring(8, 10), 10);
+        }
+
+        // --- Inicialización y Autenticación de Firebase ---
+
+        async function setupFirebase() {
+            if (!currentClubId) {
+                currentClubDisplay.textContent = 'N/A';
+                statusMessage.textContent = '';
+                loginRequired.classList.remove('hidden');
+                return;
+            }
+            
+            currentClubDisplay.textContent = currentClubId;
+            birthdayView.classList.remove('hidden');
+
+            try {
+                if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
+                    statusMessage.textContent = 'Error: Firebase no pudo inicializarse (configuración inválida o no inyectada).';
+                    isAuthReady = true;
+                    return;
+                }
+
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, (user) => {
+                    isAuthReady = true;
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Firebase Auth listo. UserID:", userId);
+                        loadBirthdays(); // Iniciar la carga de datos
+                    } else {
+                        userId = null;
+                        console.log("Sesión anónima/no autenticada. UserID es null.");
+                        statusMessage.textContent = 'Esperando autenticación de Firebase...';
+                    }
+                });
+
+                // La autenticación anónima se usa para obtener un token de usuario para Firestore
+                await signInAnonymously(auth);
+
+            } catch (error) {
+                console.error("Error CRÍTICO al inicializar o autenticar Firebase:", error);
+                statusMessage.textContent = `Error CRÍTICO de Firebase: ${error.code || error.message}. Revise la consola.`;
+                isAuthReady = true;
+                userId = null; 
+            }
+        }
+        
+        // --- LÓGICA DE CARGA Y FILTRADO DE CUMPLEAÑOS ---
+
+        let unsubscribeBirthdays = null; 
+
+        function loadBirthdays() {
+            if (unsubscribeBirthdays) {
+                unsubscribeBirthdays();
+                unsubscribeBirthdays = null;
+            }
+
+            if (!isAuthReady || !currentClubId || !db || !userId) {
+                statusMessage.textContent = 'Error: Base de datos no lista o club no seleccionado.';
+                return;
+            }
+
+            // 1. Mostrar mes actual en el título
+            const monthName = getLocalizedMonthName();
+            currentMonthNameElement.textContent = monthName;
+            statusMessage.textContent = `Buscando cumpleañeros de ${monthName}...`;
+            
+            const publicCollectionPath = `artifacts/${appId}/public/data/athletes`;
+            // Solo consultamos por el clubId, el filtro del mes se hace en el cliente
+            const q = query(
+                collection(db, publicCollectionPath),
+                where('clubId', '==', currentClubId)
+            );
+
+            // Listener en tiempo real
+            unsubscribeBirthdays = onSnapshot(q, (snapshot) => {
+                const athletes = [];
+                snapshot.forEach((doc) => {
+                    athletes.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // 2. Filtrar atletas por el mes actual (Client-Side Filtering)
+                const birthdaysThisMonth = athletes.filter(athlete => 
+                    isBirthdayThisMonth(athlete.fechaNacimiento)
+                );
+                
+                // 3. Ordenar por el día del cumpleaños
+                birthdaysThisMonth.sort((a, b) => 
+                    getBirthdayDay(a.fechaNacimiento) - getBirthdayDay(b.fechaNacimiento)
+                );
+
+                renderBirthdaysTable(birthdaysThisMonth);
+
+            }, (error) => {
+                console.error("Error al escuchar cambios en Firestore:", error);
+                statusMessage.textContent = `Fallo de carga en tiempo real: ${error.message}. Verifica las reglas de seguridad.`;
+            });
+        }
+        
+        /**
+         * Renderiza los atletas con cumpleaños en la tabla HTML.
+         */
+        function renderBirthdaysTable(birthdays) {
+            const tableBody = document.getElementById('birthdaysTableBody');
+            tableBody.innerHTML = ''; 
+            
+            if (birthdays.length === 0) {
+                const monthName = getLocalizedMonthName();
+                statusMessage.textContent = `¡Parece que no hay cumpleaños registrados para ${monthName} en tu club!`;
+                tableBody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-gray-500 font-semibold">
+                    No se encontraron atletas con cumpleaños este mes.
+                </td></tr>`;
+                return;
+            }
+            
+            statusMessage.textContent = `Mostrando ${birthdays.length} cumpleañeros.`;
+
+
+            birthdays.forEach(athlete => {
+                const day = getBirthdayDay(athlete.fechaNacimiento);
+                const fullDate = athlete.fechaNacimiento; // YYYY-MM-DD
+                const age = new Date().getFullYear() - new Date(fullDate).getFullYear();
+
+
+                const row = `
+                    <tr class="hover:bg-voley-light transition duration-150">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-voley-dark">
+                            ${athlete.nombre} ${athlete.apellido}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-lg">
+                            <span class="px-3 py-1 inline-flex text-xl leading-5 font-bold rounded-full bg-blue-500 text-white shadow-md">
+                                ${day}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${fullDate} (${age} años)
+                        </td>
+                    </tr>
+                `;
+                tableBody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        // --- Ejecución Inicial ---
+        setupFirebase();
+
+    </script>
+</body>
+</html>
