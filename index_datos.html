@@ -76,9 +76,9 @@
                 <h2 class="text-2xl font-bold mb-6 border-b pb-2 azul-electrico-text">Información Personal y de Contacto</h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 mb-8">
-                    <div><span class="data-label">Cédula de Identidad:</span> <span id="cedulaIdentidad" class="data-value"></span></div>
                     <div><span class="data-label">Nombre Completo:</span> <span id="nombreApellido" class="data-value"></span></div>
-                    <div><span class="data-label">Fecha de Nacimiento:</span> <span id="fechaNacimiento" class="data-value"></span></div>
+                    <div><span class="data-label">Cédula de Identidad:</span> <span id="cedulaIdentidad" class="data-value"></span></div>
+                    <div><span class="data-label">Teléfono:</span> <span id="telefono" class="data-value"></span></div> <div><span class="data-label">Fecha de Nacimiento:</span> <span id="fechaNacimiento" class="data-value"></span></div>
                     <div><span class="data-label">Edad Actual:</span> <span id="edad" class="data-value"></span></div>
                 </div>
                 
@@ -221,14 +221,13 @@
                     athleteNameTitle.textContent = fullName;
                     document.getElementById('pageTitle').textContent = `Ficha de ${fullName}`;
 
-                    // Llenar la Ficha
+                    // Llenar la Ficha (Incluyendo Teléfono)
                     document.getElementById('nombreApellido').textContent = fullName;
                     document.getElementById('cedulaIdentidad').textContent = data.cedulaIdentidad || 'N/A';
+                    document.getElementById('telefono').textContent = data.telefono || 'N/A'; // <--- CAMBIO AQUÍ
                     document.getElementById('fechaNacimiento').textContent = data.fechaNacimiento || 'N/A';
                     document.getElementById('edad').textContent = `${age} años`;
-                    // Nota: Teléfono u otros datos de contacto irían aquí si están en Firestore
-                    // document.getElementById('telefono').textContent = data.telefono || 'N/A'; 
-
+                    
                     document.getElementById('peso').textContent = `${data.peso.toFixed(1)} kg`;
                     document.getElementById('talla').textContent = `${data.talla.toFixed(2)} m`;
                     document.getElementById('imc').textContent = imc;
