@@ -3,191 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Voley - Gestión de Equipos</title>
-    
+    <title>Acceso al Sistema - Control Voley</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <style>
+        /* Estilos personalizados del tema Azul Marino/Eléctrico */
+        :root {
+            --color-azul-marino: #001F3F;    /* Azul Marino */
+            --color-azul-electrico: #0074D9; /* Azul Eléctrico */
+            --color-fondo-claro: #f0f8ff;    /* Azure/Azul muy pálido */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-fondo-claro); /* Fondo Azul Pálido */
+        }
+        .azul-marino-bg { background-color: var(--color-azul-marino); }
+        .azul-electrico-text { color: var(--color-azul-electrico); }
+        .rounded-xl { border-radius: 0.75rem; }
+        .shadow-lg-azul { box-shadow: 0 0 20px -5px rgba(0, 31, 63, 0.4); }
+        
+        /* Estilo para el BANNER (Altura ajustada a 250px) */
+        .banner-header {
+            background-image: url('img/banner.png'); 
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat;
+            min-height: 250px; 
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="banner-header"></div>
+    <div class="container mx-auto p-4 md:p-8 flex justify-center items-center">
 
-    <script>
-        // CONFIGURACIÓN Y INICIALIZACIÓN DE FIREBASE
-        const firebaseConfig = {
+        <div class="w-full max-w-md bg-white p-8 rounded-xl shadow-lg-azul -mt-16 relative">
+            
+            <h1 class="text-3xl font-extrabold text-center mb-6 text-gray-900">
+                Acceso al Sistema
+            </h1>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                
+                <div class="mb-4">
+                    <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+                    <input type="email" id="email" required 
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 
+                                  focus:ring-azul-electrico focus:border-azul-electrico"
+                           placeholder="ejemplo@club.com">
+                </div>
+                
+                <div class="mb-6">
+                    <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                    <input type="password" id="password" required 
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 
+                                  focus:ring-azul-electrico focus:border-azul-electrico"
+                           placeholder="••••••••">
+                </div>
+                
+                <button type="submit" id="loginButton" 
+                        class="w-full py-2 px-4 azul-marino-bg text-white font-semibold rounded-lg shadow-md 
+                               hover:bg-blue-900 transition duration-200">
+                    Iniciar Sesión
+                </button>
+                
+                <p id="errorMessage" class="text-center text-red-500 mt-4 hidden">Error de autenticación.</p>
+                
+            </form>
+            
+        </div>
+    </div>
+
+    <script type="module">
+        // --- Importaciones de Firebase ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        // --- Configuración de Firebase (debe coincidir con otros archivos) ---
+        const firebaseConfig = { 
             apiKey: "AIzaSyB5RB7mm1j-0gjCNTUEJTkyEqLjyZ3C7ws",
             authDomain: "datacontrolvoley-ff556.firebaseapp.com",
             projectId: "datacontrolvoley-ff556",
             storageBucket: "datacontrolvoley-ff556.firebasestorage.app",
             messagingSenderId: "516409072606",
-            appId: "1:516409072606:web:132538dba358a076d71b4f"
+            appId: "1:516409072606:web:132538dba358a077d71b4f" 
         };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth(); // Servicio de Autenticación
 
-        // CONFIGURACIÓN DE TAILWIND CSS
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'voley-blue': '#1e40af', // Azul fuerte (Blue 800)
-                        'voley-dark': '#1e3a8a', // Azul oscuro (Blue 900)
-                        'voley-light': '#eff6ff', // Azul muy claro (Blue 50)
-                        'login-primary': '#1e40af', 
-                        'login-dark': '#1e3a8a', 
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // --- Elementos del DOM ---
+        const loginButton = document.getElementById('loginButton');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // ====================================================================
+        // === 1. LÓGICA DE LOGIN =============================================
+        // ====================================================================
+
+        window.handleLogin = async function(event) {
+            event.preventDefault();
+            errorMessage.classList.add('hidden');
+            loginButton.disabled = true;
+            loginButton.textContent = 'Iniciando...';
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // Autenticar con Firebase
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                
+                // Si la autenticación es exitosa, redirigir
+                window.location.href = 'index_menu.html';
+
+            } catch (error) {
+                console.error("Error en el login:", error);
+                
+                let message = 'Credenciales incorrectas.';
+                if (error.code === 'auth/user-not-found') {
+                    message = 'Usuario no encontrado.';
+                } else if (error.code === 'auth/wrong-password') {
+                    message = 'Contraseña incorrecta.';
                 }
+
+                errorMessage.textContent = message;
+                errorMessage.classList.remove('hidden');
+                
+            } finally {
+                loginButton.disabled = false;
+                loginButton.textContent = 'Iniciar Sesión';
             }
         }
-    </script>
-    
-    <style>
-        /* Estilos CSS internos */
-        .hero-section {
-            background-image: url('https://placehold.co/1920x1080/0e1b3e/ffffff?text=Voleibol');
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            z-index: 0;
-        }
-
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            background: linear-gradient(135deg, rgba(30, 64, 175, 0.9) 0%, rgba(30, 64, 175, 0.7) 40%, rgba(30, 64, 175, 0.5) 100%);
-            z-index: -1;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-            animation: fadeIn 0.6s ease-out forwards;
-        }
-    </style>
-</head>
-
-<body class="bg-voley-light font-sans min-h-screen flex flex-col items-center justify-center">
-
-    <section class="hero-section w-full flex-grow flex flex-col items-center justify-center py-16 px-4 sm:px-6 lg:px-8">
         
-        <div class="w-full max-w-4xl mb-8">
-            <img src="img/banner.png" alt="Banner Control Voley" class="w-full h-auto rounded-lg shadow-2xl" onerror="this.onerror=null;this.src='https://placehold.co/800x150/1e40af/ffffff?text=Banner+Control+Voley+Horizontal'">
-        </div>
+        // ====================================================================
+        // === 2. VERIFICAR SESIÓN ACTIVA =====================================
+        // ====================================================================
+        
+        onAuthStateChanged(auth, (user) => { 
+            if (user) {
+                // Si ya está logueado, redirigir al menú inmediatamente
+                window.location.href = 'index_menu.html';
+            }
+        });
 
-        <div class="max-w-4xl w-full text-center p-8 md:p-12 rounded-xl shadow-2xl backdrop-blur-sm bg-white/10 border border-white/20 relative">
-            
-            <h1 class="text-5xl sm:text-7xl font-extrabold text-white mb-4 drop-shadow-lg">
-                Control <span class="text-voley-light">Voley</span>
-            </h1>
-
-            <p class="text-xl sm:text-2xl text-voley-light font-medium mb-10 drop-shadow-md">
-                Gestiona tu equipo, de manera simplificada y potenciada.
-            </p>
-
-            <div class="bg-white p-6 sm:p-8 rounded-lg shadow-xl mb-12 transform transition duration-500 hover:scale-[1.02]">
-                <h2 class="text-2xl sm:text-3xl font-bold text-voley-dark mb-4">
-                    Administración Integral
-                </h2>
-                <p class="text-lg text-gray-700 leading-relaxed">
-                    Control Voley te permite gestionar todos los aspectos cruciales de tu club: *Datos de Atletas*, *Administración de pagos y vencimientos*, *Llevar estadísticas de juego*, y el seguimiento de *Cumpleaños* de cada atleta.
-                </p>
-            </div>
-
-            <div id="login-form-container" class="w-full max-w-sm mx-auto bg-voley-light p-6 rounded-xl shadow-2xl transform transition duration-500 hover:scale-[1.02]">
-                
-                <h2 class="text-2xl font-bold mb-6 text-center text-voley-dark">Acceso a Clubes</h2>
-                
-                <form id="loginForm" onsubmit="event.preventDefault(); handleLogin();">
-                    <div class="mb-4 text-left">
-                        <label for="clubNameInput" class="block text-sm font-medium text-gray-700 mb-1">Email del Club</label>
-                        <input type="email" id="clubNameInput" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-login-primary focus:border-login-primary" placeholder="Ej: fenix@club.com" required>
-                    </div>
-                    
-                    <div class="mb-6 text-left">
-                        <label for="clubKeyInput" class="block text-sm font-medium text-gray-700 mb-1">Clave de Acceso</label>
-                        <input type="password" id="clubKeyInput" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-login-primary focus:border-login-primary" placeholder="Ingresa la clave" required>
-                    </div>
-
-                    <div id="loginMessage" class="text-sm text-red-600 mb-4 text-center hidden font-medium"></div>
-
-                    <button type="submit" id="loginButton" class="w-full py-3 bg-login-primary text-white font-semibold rounded-lg shadow-md hover:bg-login-dark transition duration-300 transform hover:scale-[1.01] border-b-4 border-voley-dark">
-                        Iniciar Sesión
-                    </button>
-                </form>
-
-            </div>
-            
-        </div>
-    </section>
-
-    <footer class="w-full py-4 text-center bg-voley-dark shadow-inner">
-        <p class="text-sm text-white/70">
-            &copy; 2023 Todos los derechos reservados a Sistematikos - Frank Hernandez
-        </p>
-    </footer>
-
-    <script>
-        window.handleLogin = function() {
-            const emailInput = document.getElementById('clubNameInput').value.trim();
-            const passwordInput = document.getElementById('clubKeyInput').value.trim();
-            const loginMessage = document.getElementById('loginMessage');
-            const loginButton = document.getElementById('loginButton');
-            
-            // Limpiar mensaje y deshabilitar botón
-            loginMessage.classList.add('hidden');
-            loginButton.disabled = true;
-            loginButton.textContent = 'Verificando...';
-
-            // Llamada a la API de autenticación de Firebase
-            auth.signInWithEmailAndPassword(emailInput, passwordInput)
-                .then((userCredential) => {
-                    // LOGIN EXITOSO
-                    const user = userCredential.user;
-                    
-                    // Se utiliza la primera parte del email como nombre del club para simplificar
-                    const clubName = user.email.split('@')[0].charAt(0).toUpperCase() + user.email.split('@')[0].slice(1);
-                    
-                    // Guardar el nombre del club asociado al usuario en localStorage
-                    localStorage.setItem('currentClub', clubName);
-
-                    loginMessage.textContent = `¡Bienvenido, ${clubName}! Redirigiendo al menú...`;
-                    loginMessage.style.color = 'green';
-                    loginMessage.classList.remove('hidden');
-
-                    setTimeout(() => {
-                        // REDIRECCIÓN AL MENÚ
-                        window.location.href = 'index_menu.html';
-                    }, 1000);
-                })
-                .catch((error) => {
-                    // LOGIN FALLIDO
-                    let errorMessage = 'Error de acceso: Email o Clave incorrectos.';
-                    
-                    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                        errorMessage = 'Email o Clave incorrectos.';
-                    } else if (error.code === 'auth/invalid-email') {
-                        errorMessage = 'Formato de Email inválido.';
-                    }
-                    
-                    loginMessage.textContent = errorMessage;
-                    loginMessage.style.color = 'red';
-                    loginMessage.classList.remove('hidden');
-
-                    // Restablecer el botón
-                    loginButton.disabled = false;
-                    loginButton.textContent = 'Iniciar Sesión';
-                    localStorage.removeItem('currentClub');
-                });
-        }
     </script>
-
 </body>
 </html>
