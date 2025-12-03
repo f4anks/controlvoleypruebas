@@ -41,7 +41,7 @@
         .data-value {
             color: #1f2937; /* Gray-800 */
         }
-        /* Color de fondo para las métricas físicas */
+        /* Color de fondo para las métricas físicas y de pago */
         .metric-card {
             background-color: #f7f9fb; /* Light background for metrics */
             border-left: 4px solid var(--color-azul-electrico);
@@ -78,10 +78,31 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 mb-8">
                     <div><span class="data-label">Nombre Completo:</span> <span id="nombreApellido" class="data-value"></span></div>
                     <div><span class="data-label">Cédula de Identidad:</span> <span id="cedulaIdentidad" class="data-value"></span></div>
-                    <div><span class="data-label">Teléfono:</span> <span id="telefono" class="data-value"></span></div> <div><span class="data-label">Fecha de Nacimiento:</span> <span id="fechaNacimiento" class="data-value"></span></div>
+                    <div><span class="data-label">Teléfono:</span> <span id="telefono" class="data-value"></span></div>
+                    <div><span class="data-label">Fecha de Nacimiento:</span> <span id="fechaNacimiento" class="data-value"></span></div>
                     <div><span class="data-label">Edad Actual:</span> <span id="edad" class="data-value"></span></div>
                 </div>
                 
+                <h2 class="text-2xl font-bold mb-6 border-b pb-2 azul-electrico-text">Gestión de Pagos</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+                    
+                    <div class="metric-card p-4 rounded-lg shadow-sm">
+                        <p class="data-label text-sm">Nómina Mensual (Bs)</p>
+                        <p id="montoPagoMensual" class="text-3xl font-extrabold data-value"></p>
+                    </div>
+
+                    <div class="metric-card p-4 rounded-lg shadow-sm">
+                        <p class="data-label text-sm">Fecha Último Pago</p>
+                        <p id="fechaUltimoPago" class="text-xl font-bold data-value"></p>
+                    </div>
+
+                    <div class="metric-card p-4 rounded-lg shadow-sm">
+                        <p class="data-label text-sm">Estado de Solvencia</p>
+                        <span id="solvencyStatus" class="text-xl font-bold data-value inline-block mt-2 px-2 py-1 leading-none rounded-full"></span>
+                    </div>
+
+                </div>
+
                 <h2 class="text-2xl font-bold mb-6 border-b pb-2 azul-electrico-text">Métricas Físicas y Deportivas</h2>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -183,13 +204,35 @@
             return age;
         }
 
-        // Función de Proyección de Talla (SÓLO SIMULACIÓN)
         function calculateTallaProyeccion(talla) {
             if (!talla || talla < 1.0) return 'N/A'; 
             
             // Retorna la talla actual + 5 cm (0.05 m) como una estimación simple y fija.
             const projectedTalla = talla + 0.05; 
             return projectedTalla.toFixed(2);
+        }
+        
+        /**
+         * Calcula el estado de solvencia basado en la fecha del último pago.
+         * Solvente: Pago dentro de los últimos 30 días.
+         * Insolvente: Sin pago registrado o pago mayor a 30 días.
+         */
+        function calculateSolvencyStatus(fechaUltimoPago) {
+            if (!fechaUltimoPago) return { status: 'Insolvente', class: 'bg-red-500 text-white' };
+
+            const lastPaymentDate = new Date(fechaUltimoPago);
+            const today = new Date();
+            lastPaymentDate.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0); 
+            
+            const oneDay = 1000 * 60 * 60 * 24;
+            const diffDays = Math.round((today - lastPaymentDate) / oneDay);
+
+            if (diffDays <= 30) {
+                return { status: 'Solvente', class: 'bg-green-500 text-white' };
+            } else {
+                return { status: 'Insolvente', class: 'bg-yellow-500 text-gray-800' };
+            }
         }
 
 
@@ -215,21 +258,29 @@
                     const imcStatus = getIMCStatus(imc);
                     const age = calculateAge(data.fechaNacimiento);
                     const tallaProyeccion = calculateTallaProyeccion(data.talla);
+                    const solvency = calculateSolvencyStatus(data.fechaUltimoPago); // <--- NUEVO CÁLCULO
                     
                     // Actualizar Títulos
                     const fullName = data.nombre + " " + data.apellido;
                     athleteNameTitle.textContent = fullName;
                     document.getElementById('pageTitle').textContent = `Ficha de ${fullName}`;
 
-                    // Llenar la Ficha (Incluyendo Teléfono)
+                    // Llenar Datos Personales
                     document.getElementById('nombreApellido').textContent = fullName;
                     document.getElementById('cedulaIdentidad').textContent = data.cedulaIdentidad || 'N/A';
-                    document.getElementById('telefono').textContent = data.telefono || 'N/A'; // <--- CAMBIO AQUÍ
+                    document.getElementById('telefono').textContent = data.telefono || 'N/A'; 
                     document.getElementById('fechaNacimiento').textContent = data.fechaNacimiento || 'N/A';
                     document.getElementById('edad').textContent = `${age} años`;
                     
-                    document.getElementById('peso').textContent = `${data.peso.toFixed(1)} kg`;
-                    document.getElementById('talla').textContent = `${data.talla.toFixed(2)} m`;
+                    // Llenar Datos de Pagos (NUEVO)
+                    document.getElementById('montoPagoMensual').textContent = `${(data.montoPagoMensual || 0).toFixed(2)}`;
+                    document.getElementById('fechaUltimoPago').textContent = data.fechaUltimoPago || 'No Registrada';
+                    document.getElementById('solvencyStatus').textContent = solvency.status;
+                    document.getElementById('solvencyStatus').className = `text-xl font-bold data-value inline-block mt-2 px-2 py-1 leading-none rounded-full ${solvency.class}`;
+
+                    // Llenar Métricas Físicas
+                    document.getElementById('peso').textContent = `${(data.peso || 0).toFixed(1)} kg`;
+                    document.getElementById('talla').textContent = `${(data.talla || 0).toFixed(2)} m`;
                     document.getElementById('imc').textContent = imc;
                     document.getElementById('imcStatus').textContent = imcStatus.text;
                     document.getElementById('imcStatus').className = `inline-block mt-1 px-2 py-0.5 text-xs font-semibold rounded-full ${imcStatus.class}`;
