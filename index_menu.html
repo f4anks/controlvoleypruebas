@@ -3,28 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menú Principal - LVMEL</title>
+    <title>Buscar Ficha - LVMEL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     
     <style>
         /* Estilos personalizados del tema Azul Marino/Eléctrico */
         :root {
-            --color-azul-marino: #001F3F;    /* Azul Marino */
-            --color-azul-electrico: #0074D9; /* Azul Eléctrico */
-            --color-fondo-claro: #f0f8ff;    /* Azure/Azul muy pálido */
+            --color-azul-marino: #001F3F;    
+            --color-azul-electrico: #0074D9; 
+            --color-fondo-claro: #f0f8ff;    
         }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--color-fondo-claro); /* Fondo Azul Pálido */
+            background-color: var(--color-fondo-claro); 
         }
         .azul-marino-bg { background-color: var(--color-azul-marino); }
-        .azul-marino-hover:hover { background-color: #001a33; }
         .azul-electrico-text { color: var(--color-azul-electrico); }
         .rounded-xl { border-radius: 0.75rem; }
         .shadow-lg-azul { box-shadow: 0 0 20px -5px rgba(0, 31, 63, 0.4); }
         
-        /* Estilo para el BANNER (Altura ajustada a 250px) */
         .banner-header {
             background-image: url('img/banner.png'); 
             background-size: cover; 
@@ -33,6 +31,10 @@
             min-height: 250px; 
             width: 100%;
         }
+        .athlete-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 116, 217, 0.2); 
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -40,54 +42,46 @@
     <div class="banner-header"></div>
     <div class="container mx-auto p-4 md:p-8">
         
-        <header class="mb-10 flex flex-col md:flex-row justify-between items-center border-b pb-4">
-            <h1 class="text-3xl font-extrabold text-gray-900">
-                Bienvenido, <span id="clubNameDisplay" class="azul-electrico-text">Cargando...</span>
-            </h1>
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-center border-b pb-4">
+            <div class="flex items-center space-x-4">
+                <a href="index_menu.html" class="text-gray-600 hover:text-azul-electrico transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+                    </svg>
+                </a>
+                <h1 class="text-3xl font-extrabold text-gray-900">
+                    Buscar Ficha Técnica
+                </h1>
+            </div>
             <button onclick="logout()" class="mt-4 md:mt-0 py-2 px-4 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-200 shadow-md">
                 Cerrar Sesión
             </button>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-            <a href="index_atletas.html" class="block bg-white p-6 rounded-xl shadow-lg-azul hover:shadow-xl hover:scale-[1.02] transition duration-300 transform">
-                <div class="flex items-center space-x-4">
-                    <div class="flex-shrink-0 p-3 rounded-full azul-marino-bg text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-xl font-bold azul-electrico-text">Gestión de Atletas</p>
-                        <p class="text-gray-500">Registrar, editar y ver la nómina.</p>
-                    </div>
-                </div>
-            </a>
-
-            <a href="index_cumple.html" class="block bg-white p-6 rounded-xl shadow-lg-azul hover:shadow-xl hover:scale-[1.02] transition duration-300 transform">
-                <div class="flex items-center space-x-4">
-                    <div class="flex-shrink-0 p-3 rounded-full azul-marino-bg text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M5.5 8a.5.5 0 01.5-.5h2a.5.5 0 010 1H6a.5.5 0 01-.5-.5zm2.5 0a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2a.5.5 0 01.5-.5zm-4 4a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2a.5.5 0 01.5-.5z"/>
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0 1 1 0 002 0zM7 9a1 1 0 00-1 1v1a1 1 0 102 0v-1a1 1 0 00-1-1zm6-1a1 1 0 00-1 1v1a1 1 0 102 0v-1a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-xl font-bold azul-electrico-text">Cumpleaños del Mes</p>
-                        <p class="text-gray-500">Verificar atletas que celebran este mes.</p>
-                    </div>
-                </div>
-            </a>
+        <div class="bg-white p-6 rounded-xl shadow-lg-azul">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Selecciona un Atleta</h2>
             
+            <input type="text" id="searchAthlete" placeholder="Buscar por nombre o cédula..." 
+                   onkeyup="filterAthletes()" 
+                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-3 mb-6 focus:ring-azul-electrico focus:border-azul-electrico">
+
+            <div id="athletesListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto">
+                <p id="loadingMessage" class="col-span-full text-center py-8 text-gray-500">Cargando nómina...</p>
             </div>
+        </div>
 
     </div>
 
     <script type="module">
+        // --- CONSTANTES ---
+        const ATHLETES_COLLECTION_NAME = 'club_athletes';
+
         // --- Importaciones de Firebase ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, collection, doc, onSnapshot, query, where, getDoc 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"; 
         
         // --- Configuración de Firebase ---
         const firebaseConfig = { 
@@ -101,23 +95,135 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const clubNameDisplay = document.getElementById('clubNameDisplay');
+        const db = getFirestore(app);
 
-        // Lógica de Autenticación
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // Si el usuario está logueado
-                let clubName = localStorage.getItem('currentClub') || 'Club';
-                
-                // Si es el primer login, usa el email como nombre por defecto
-                if (clubName === 'Club Principal' || clubName === 'Club' || !localStorage.getItem('currentClub')) {
-                    clubName = user.email ? user.email.split('@')[0].charAt(0).toUpperCase() + user.email.split('@')[0].slice(1) : 'Club Logueado';
-                    localStorage.setItem('currentClub', clubName);
+        // --- Variables de Estado ---
+        let teamId = null;
+        let allAthletes = []; // Almacenará la lista completa para el filtrado
+        const athletesListContainer = document.getElementById('athletesListContainer');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const searchAthleteInput = document.getElementById('searchAthlete');
+        
+        
+        // ====================================================================
+        // === 1. UTILIDADES Y AUTENTICACIÓN ==================================
+        // ====================================================================
+
+        async function getTeamId(uid) {
+            if (!db) return null;
+            try {
+                const userDocRef = doc(db, "users", uid); 
+                const docSnap = await getDoc(userDocRef);
+
+                if (docSnap.exists() && docSnap.data().teamId) {
+                    return docSnap.data().teamId;
                 }
-                clubNameDisplay.textContent = clubName;
+                return null;
+            } catch (error) {
+                console.error("Error al obtener el Team ID:", error);
+                return null;
+            }
+        }
+        
+        function calculateAge(dateOfBirth) {
+            if (!dateOfBirth) return 'N/A';
+            const birthDate = new Date(dateOfBirth);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDifference = today.getMonth() - birthDate.getMonth();
+            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        // ====================================================================
+        // === 2. GESTIÓN DE DATOS Y RENDERIZADO ==============================
+        // ====================================================================
+
+        function loadAthletes() {
+            if (!db || !teamId) {
+                loadingMessage.textContent = "Error: Team ID no disponible.";
+                return;
+            }
+
+            // Filtrado por teamId, en tiempo real
+            const q = query(collection(db, ATHLETES_COLLECTION_NAME), where("clubId", "==", teamId));
+
+            onSnapshot(q, (snapshot) => {
+                allAthletes = []; // Resetear lista completa
+                snapshot.forEach(doc => {
+                    allAthletes.push({ id: doc.id, ...doc.data() });
+                });
+                // Renderizar la lista inicial
+                renderAthletesList(allAthletes);
+            }, (error) => {
+                console.error("Error al cargar atletas: ", error);
+                loadingMessage.textContent = "Error al cargar datos. Verifique la conexión y las Reglas de Seguridad.";
+            });
+        }
+
+        window.filterAthletes = function() {
+            const searchTerm = searchAthleteInput.value.toLowerCase();
+            const filteredList = allAthletes.filter(athlete => 
+                athlete.nombre.toLowerCase().includes(searchTerm) || 
+                athlete.apellido.toLowerCase().includes(searchTerm) ||
+                (athlete.cedulaIdentidad && athlete.cedulaIdentidad.toString().includes(searchTerm))
+            );
+            renderAthletesList(filteredList);
+        }
+
+        function renderAthletesList(athletes) {
+            athletesListContainer.innerHTML = ''; 
+
+            if (athletes.length === 0) {
+                athletesListContainer.innerHTML = '<p class="col-span-full text-center py-8 text-gray-500">No se encontraron atletas o la nómina está vacía.</p>';
+                return;
+            }
+
+            athletes.forEach(athlete => {
+                const age = calculateAge(athlete.fechaNacimiento);
                 
+                // Card que al hacer clic llama a la ficha de datos
+                const card = `
+                    <div onclick="redirectToAthleteData('${athlete.id}')" 
+                         class="athlete-card cursor-pointer bg-white p-4 rounded-lg shadow-md border-l-4 border-azul-electrico transition duration-200">
+                        <p class="text-lg font-bold azul-electrico-text">${athlete.nombre} ${athlete.apellido}</p>
+                        <p class="text-sm text-gray-600">CI: ${athlete.cedulaIdentidad || 'N/A'}</p>
+                        <p class="text-sm text-gray-500">Edad: ${age} años</p>
+                        <span class="inline-block mt-2 text-xs font-semibold text-gray-700">Ver Ficha →</span>
+                    </div>
+                `;
+                athletesListContainer.insertAdjacentHTML('beforeend', card);
+            });
+        }
+        
+        // Función de redirección global
+        window.redirectToAthleteData = function(athleteId) {
+            window.location.href = `index_datos.html?id=${athleteId}`;
+        }
+
+
+        // ====================================================================
+        // === 3. INICIALIZACIÓN ==============================================
+        // ====================================================================
+        
+        onAuthStateChanged(auth, async (user) => { 
+            if (user) {
+                const userId = user.uid; 
+                
+                teamId = await getTeamId(userId);
+
+                if (teamId) {
+                    loadingMessage.textContent = "Cargando atletas...";
+                    loadAthletes();
+                } else {
+                    console.error("No se pudo obtener el Team ID. Redirigiendo.");
+                    await signOut(auth);
+                    window.location.href = 'index.html'; 
+                }
+
             } else {
-                // Si no hay sesión, redirigir al login
                 console.log("Sesión no encontrada. Redirigiendo a index.html");
                 window.location.href = 'index.html'; 
             }
@@ -132,6 +238,7 @@
                 console.error("Error al cerrar sesión:", error);
             }
         }
+        
     </script>
 
 </body>
