@@ -42,16 +42,19 @@ onAuthStateChanged(auth, (user) => {
 
 
 // ====================================================================
-// === 2. ESCUCHA DE DATOS EN TIEMPO REAL (MODIFICADA PARA FILTROS)
+// === 2. ESCUCHA DE DATOS EN TIEMPO REAL
 // ====================================================================
 
 function setupRealtimeListener() {
+    // Consulta los atletas ordenados por CI
     const q = query(collection(db, "atletas"), orderBy("ci", "asc"));
     
+    // Escucha de cambios en tiempo real
     onSnapshot(q, (snapshot) => {
         atletasData = []; 
         categoriasUnicas.clear(); 
         
+        // Mapea los documentos a objetos JavaScript
         snapshot.forEach((doc) => {
             const atleta = doc.data();
             atleta.id = doc.id;
@@ -62,9 +65,13 @@ function setupRealtimeListener() {
             }
         });
         
+        // Ocultar el mensaje de carga una vez que se recibieron los datos (éxito o vacío)
+        document.getElementById('loadingMessage').classList.add('hidden');
+
+        // Renderiza la tabla con los datos recibidos
         renderAtletas(atletasData);
         populateCategoryFilter(categoriasUnicas); 
-        document.getElementById('loadingMessage').classList.add('hidden');
+        
     }, (error) => {
         console.error("Error al obtener los atletas:", error);
         document.getElementById('loadingMessage').textContent = "Error al cargar los datos.";
@@ -97,18 +104,30 @@ function populateCategoryFilter(categorias) {
 
 
 // ====================================================================
-// === 4. FUNCIÓN PARA PINTAR LA TABLA 
+// === 4. FUNCIÓN PARA PINTAR LA TABLA (Con manejo de datos vacíos)
 // ====================================================================
 
 function renderAtletas(data) {
     const tbody = document.getElementById('atletasBody');
     tbody.innerHTML = ''; 
     
+    const table = document.getElementById('atletasTable');
+    const noResults = document.getElementById('noResultsMessage');
+    
+    // --- MANEJO DE CASO SIN DATOS ---
+    if (data.length === 0) {
+        table.classList.add('hidden');
+        noResults.textContent = 'No hay atletas registrados en esta base de datos.';
+        noResults.classList.remove('hidden');
+        return; 
+    }
+    
+    // --- PINTAR FILAS ---
     data.forEach(atleta => {
         const row = tbody.insertRow();
         row.id = atleta.id; 
         
-        // Columnas de Datos
+        // Columnas de Datos 
         row.insertCell().textContent = atleta.ci;
         row.insertCell().textContent = `${atleta.nombre} ${atleta.apellido}`;
         row.insertCell().textContent = atleta.fechaNac || 'N/A';
@@ -120,125 +139,4 @@ function renderAtletas(data) {
         const actionsCell = row.insertCell();
         const editButton = document.createElement('button');
         editButton.textContent = 'Editar';
-        editButton.className = 'bg-azul-electrico text-white py-1 px-3 rounded-md hover:bg-blue-700 transition duration-150 text-sm';
-        editButton.onclick = () => editAtleta(atleta.id);
-        actionsCell.appendChild(editButton);
-    });
-    
-    document.getElementById('atletasTable').classList.remove('hidden');
-    
-    window.aplicarFiltros(); 
-}
-
-// ====================================================================
-// === 5. FUNCIÓN PRINCIPAL DE FILTRADO Y BÚSQUEDA
-// ====================================================================
-
-window.aplicarFiltros = function() {
-    const inputBusqueda = document.getElementById('searchInput').value.toLowerCase();
-    const filtroCategoria = document.getElementById('filtroCategoria').value;
-    const filtroSexo = document.getElementById('filtroSexo').value;
-    const filtroSolvencia = document.getElementById('filtroSolvencia').value;
-    
-    const tabla = document.getElementById('atletasTable');
-    const filas = tabla.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    let resultadosVisibles = 0;
-    
-    for (let i = 0; i < filas.length; i++) {
-        const fila = filas[i];
-        
-        const ci = fila.cells[0].textContent.toLowerCase();
-        const nombreCompleto = fila.cells[1].textContent.toLowerCase();
-        const categoria = fila.cells[3].textContent;
-        const sexo = fila.cells[4].textContent;
-        const solvencia = fila.cells[5].textContent;
-
-        let cumpleBusqueda = true;
-        let cumpleFiltroCat = true;
-        let cumpleFiltroSexo = true;
-        let cumpleFiltroSolvencia = true;
-        
-        if (inputBusqueda) {
-            cumpleBusqueda = ci.includes(inputBusqueda) || nombreCompleto.includes(inputBusqueda);
-        }
-        
-        if (filtroCategoria) {
-            cumpleFiltroCat = categoria === filtroCategoria;
-        }
-        
-        if (filtroSexo) {
-            cumpleFiltroSexo = sexo === filtroSexo;
-        }
-        
-        if (filtroSolvencia) {
-            cumpleFiltroSolvencia = solvencia === filtroSolvencia;
-        }
-
-        if (cumpleBusqueda && cumpleFiltroCat && cumpleFiltroSexo && cumpleFiltroSolvencia) {
-            fila.style.display = "";
-            resultadosVisibles++;
-        } else {
-            fila.style.display = "none";
-        }
-    }
-    
-    const noResults = document.getElementById('noResultsMessage');
-    if (resultadosVisibles === 0 && filas.length > 0) {
-        noResults.classList.remove('hidden');
-    } else {
-        noResults.classList.add('hidden');
-    }
-}
-
-
-// ====================================================================
-// === 6. LÓGICA DE ORDENAMIENTO DE TABLA (Se mantiene igual)
-// ====================================================================
-
-let currentSortColumn = -1;
-let sortAscending = true;
-
-window.sortTable = function(columnIndex) {
-    const table = document.getElementById("atletasTable");
-    const tbody = table.querySelector("tbody");
-    const rows = Array.from(tbody.rows);
-
-    if (currentSortColumn === columnIndex) {
-        sortAscending = !sortAscending;
-    } else {
-        currentSortColumn = columnIndex;
-        sortAscending = true; 
-    }
-
-    rows.sort((rowA, rowB) => {
-        const cellA = rowA.cells[columnIndex].textContent.trim();
-        const cellB = rowB.cells[columnIndex].textContent.trim();
-        let comparison = 0;
-
-        const numA = Number(cellA);
-        const numB = Number(cellB);
-        if (!isNaN(numA) && !isNaN(numB) && columnIndex === 0) {
-             comparison = numA - numB;
-        } else {
-            comparison = cellA.localeCompare(cellB);
-        }
-
-        return sortAscending ? comparison : comparison * -1;
-    });
-
-    rows.forEach(row => tbody.appendChild(row));
-    
-    window.aplicarFiltros();
-}
-
-
-// ====================================================================
-// === 7. FUNCIÓN DE EDICIÓN (IMPORTANTE)
-// ====================================================================
-
-window.editAtleta = function(atletaId) {
-    // Guarda el ID del atleta en el almacenamiento local
-    localStorage.setItem('editAtletaId', atletaId);
-    // Redirige al formulario de registro/edición
-    window.location.href = 'frm_atletas.html';
-}
+        editButton.className = 'bg-azul-electrico text-white py-1 px-3 rounded-md hover:bg-blue-700 transition duration-
