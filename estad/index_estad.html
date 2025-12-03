@@ -274,7 +274,15 @@
                 const option = document.createElement('option');
                 const value = actions[actionName];
                 option.value = actionName;
-                option.textContent = `${actionName} (${value > 0 ? '+' : ''}${value})`;
+                
+                // --- MODIFICACIÓN PARA AÑADIR ESPACIO VISUAL ---
+                // Uso de '\u00A0' (Non-breaking space) para asegurar la separación horizontal
+                const code = actionName.substring(0, 2); // Ejemplo: 'S#'
+                const name = actionName.substring(3);    // Ejemplo: 'Servicio Positivo'
+                const scoreDisplay = `(${value > 0 ? '+' : ''}${value})`;
+                
+                // Se aumenta el espacio entre código y nombre, y entre nombre y puntuación
+                option.textContent = `${code}${'\u00A0'.repeat(7)}${name}${'\u00A0'.repeat(5)}${scoreDisplay}`;
                 
                 if (value > 0) {
                     // Azul Eléctrico
