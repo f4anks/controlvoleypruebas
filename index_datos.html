@@ -108,6 +108,11 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     
                     <div class="metric-card p-4 rounded-lg shadow-sm">
+                        <p class="data-label text-sm">Nro. Camiseta</p>
+                        <p id="nroCamiseta" class="text-3xl font-extrabold data-value"></p>
+                    </div>
+                    
+                    <div class="metric-card p-4 rounded-lg shadow-sm">
                         <p class="data-label text-sm">Peso (kg)</p>
                         <p id="peso" class="text-3xl font-extrabold data-value"></p>
                     </div>
@@ -214,8 +219,6 @@
         
         /**
          * Calcula el estado de solvencia basado en la fecha del último pago.
-         * Solvente: Pago dentro de los últimos 30 días.
-         * Insolvente: Sin pago registrado o pago mayor a 30 días.
          */
         function calculateSolvencyStatus(fechaUltimoPago) {
             if (!fechaUltimoPago) return { status: 'Insolvente', class: 'bg-red-500 text-white' };
@@ -258,7 +261,7 @@
                     const imcStatus = getIMCStatus(imc);
                     const age = calculateAge(data.fechaNacimiento);
                     const tallaProyeccion = calculateTallaProyeccion(data.talla);
-                    const solvency = calculateSolvencyStatus(data.fechaUltimoPago); // <--- NUEVO CÁLCULO
+                    const solvency = calculateSolvencyStatus(data.fechaUltimoPago); 
                     
                     // Actualizar Títulos
                     const fullName = data.nombre + " " + data.apellido;
@@ -272,13 +275,16 @@
                     document.getElementById('fechaNacimiento').textContent = data.fechaNacimiento || 'N/A';
                     document.getElementById('edad').textContent = `${age} años`;
                     
-                    // Llenar Datos de Pagos (NUEVO)
+                    // Llenar Datos de Pagos
                     document.getElementById('montoPagoMensual').textContent = `${(data.montoPagoMensual || 0).toFixed(2)}`;
                     document.getElementById('fechaUltimoPago').textContent = data.fechaUltimoPago || 'No Registrada';
                     document.getElementById('solvencyStatus').textContent = solvency.status;
                     document.getElementById('solvencyStatus').className = `text-xl font-bold data-value inline-block mt-2 px-2 py-1 leading-none rounded-full ${solvency.class}`;
 
                     // Llenar Métricas Físicas
+                    // NUEVO CAMPO: Nro Camiseta
+                    document.getElementById('nroCamiseta').textContent = data.nroCamiseta || 'N/A';
+                    
                     document.getElementById('peso').textContent = `${(data.peso || 0).toFixed(1)} kg`;
                     document.getElementById('talla').textContent = `${(data.talla || 0).toFixed(2)} m`;
                     document.getElementById('imc').textContent = imc;
