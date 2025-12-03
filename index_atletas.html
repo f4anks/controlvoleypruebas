@@ -93,6 +93,10 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
                     <div>
+                        <label for="nroCamiseta" class="block text-sm font-medium text-gray-700">Nro Camiseta</label>
+                        <input type="number" id="nroCamiseta" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico" placeholder="Ej: 10">
+                    </div>
+                    <div>
                         <label for="fechaNacimiento" class="block text-sm font-medium text-gray-700">Fecha Nacimiento</label>
                         <input type="date" id="fechaNacimiento" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
                     </div>
@@ -104,6 +108,9 @@
                         <label for="talla" class="block text-sm font-medium text-gray-700">Talla (m)</label>
                         <input type="number" id="talla" step="0.01" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
                     </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                     <div>
                         <label for="tipoNomina" class="block text-sm font-medium text-gray-700">Tipo de Nómina</label>
                         <select id="tipoNomina" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
@@ -112,9 +119,6 @@
                             <option value="baja">Baja Temporal</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div>
                         <label for="montoPagoMensual" class="block text-sm font-medium text-gray-700">Nómina Mensual (Bs)</label>
                         <input type="number" id="montoPagoMensual" step="0.01" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico" placeholder="Monto del pago mensual">
@@ -145,6 +149,9 @@
                         <th onclick="sortAthletes('nombre')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
                             Nombre <span id="sort-nombre" class="sort-icon"></span>
                         </th>
+                        <th onclick="sortAthletes('nroCamiseta')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
+                            Nro. Camiseta <span id="sort-nroCamiseta" class="sort-icon"></span>
+                        </th>
                         <th onclick="sortAthletes('cedulaIdentidad')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
                             Cédula <span id="sort-cedulaIdentidad" class="sort-icon"></span>
                         </th>
@@ -164,7 +171,7 @@
                 </thead>
                 <tbody id="athletesTableBody" class="bg-white divide-y divide-gray-200">
                     <tr>
-                        <td colspan="6" class="px-6 py-4 text-center text-gray-500" id="loadingRow">Cargando atletas...</td>
+                        <td colspan="7" class="px-6 py-4 text-center text-gray-500" id="loadingRow">Cargando atletas...</td>
                     </tr>
                 </tbody>
             </table>
@@ -278,19 +285,27 @@
             if (sortKey === 'fechaNacimiento') {
                 valA = new Date(a.fechaNacimiento).getTime();
                 valB = new Date(b.fechaNacimiento).getTime();
-                if (sortDirection === 'desc') {
+                // Queremos edad ascendente (más joven primero) o descendente (más viejo primero)
+                // Fecha de nacimiento más reciente (mayor timestamp) = más joven
+                // Sort by date is tricky. For ASC (A-Z, 1-10) we want oldest first (lowest timestamp).
+                if (sortDirection === 'asc') {
                     return valA - valB; 
                 }
                 return valB - valA; 
             }
             
-            // Ordenar por solvencia (fecha)
             if (sortKey === 'fechaUltimoPago') {
                 // Las fechas vacías se consideran lo más insolvente (más antiguo/primero)
                 valA = a.fechaUltimoPago ? new Date(a.fechaUltimoPago).getTime() : 0;
                 valB = b.fechaUltimoPago ? new Date(b.fechaUltimoPago).getTime() : 0;
             }
             
+            // ORDENAR POR CAMISETA (numérico)
+            if (sortKey === 'nroCamiseta' && valA && valB) {
+                 valA = parseInt(valA);
+                 valB = parseInt(valB);
+            }
+
             if (sortKey === 'cedulaIdentidad' && valA && valB) {
                  valA = parseInt(valA);
                  valB = parseInt(valB);
@@ -331,7 +346,7 @@
             if (athletes.length === 0) {
                 athletesTableBody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">No hay atletas registrados en este club.</td>
+                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">No hay atletas registrados en este club.</td>
                     </tr>
                 `;
                 return;
@@ -339,7 +354,7 @@
 
             athletes.forEach(athlete => {
                 const age = calculateAge(athlete.fechaNacimiento);
-                const solvency = calculateSolvencyStatus(athlete.fechaUltimoPago); // <--- CÁLCULO DE SOLVENCIA
+                const solvency = calculateSolvencyStatus(athlete.fechaUltimoPago); 
                 
                 let nominaClass = '';
                 switch (athlete.tipoNomina) {
@@ -355,10 +370,15 @@
                     default:
                         nominaClass = 'bg-gray-100 text-gray-800';
                 }
+                
+                // Formatear Nro Camiseta
+                const jerseyNumber = athlete.nroCamiseta ? `<span class="text-lg font-bold">${athlete.nroCamiseta}</span>` : '-';
+
 
                 const row = `
                     <tr class="hover:bg-gray-50 transition duration-150">
                         <td class="px-6 py-4 whitespace-nowrap">${athlete.nombre} ${athlete.apellido}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">${jerseyNumber}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${athlete.cedulaIdentidad || 'N/A'}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${age} años</td>
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -416,12 +436,15 @@
                 apellido: document.getElementById('apellido').value.trim(),
                 cedulaIdentidad: document.getElementById('cedulaIdentidad').value.trim(),
                 telefono: document.getElementById('telefono').value.trim(),
+                
+                // CAMPOS DE LA SEGUNDA FILA (incluyendo Nro Camiseta)
+                nroCamiseta: parseInt(document.getElementById('nroCamiseta').value) || 0,
                 fechaNacimiento: document.getElementById('fechaNacimiento').value,
                 peso: parseFloat(document.getElementById('peso').value),
                 talla: parseFloat(document.getElementById('talla').value),
+
+                // CAMPOS DE LA TERCERA FILA
                 tipoNomina: document.getElementById('tipoNomina').value,
-                
-                // NUEVOS CAMPOS DE PAGO
                 montoPagoMensual: parseFloat(document.getElementById('montoPagoMensual').value) || 0,
                 fechaUltimoPago: document.getElementById('fechaUltimoPago').value,
                 
@@ -457,12 +480,15 @@
                 document.getElementById('apellido').value = athlete.apellido;
                 document.getElementById('cedulaIdentidad').value = athlete.cedulaIdentidad;
                 document.getElementById('telefono').value = athlete.telefono || '';
+                
+                // CARGAR CAMPOS DE LA SEGUNDA FILA (incluyendo Nro Camiseta)
+                document.getElementById('nroCamiseta').value = athlete.nroCamiseta || '';
                 document.getElementById('fechaNacimiento').value = athlete.fechaNacimiento;
                 document.getElementById('peso').value = athlete.peso;
                 document.getElementById('talla').value = athlete.talla;
+
+                // CARGAR CAMPOS DE LA TERCERA FILA
                 document.getElementById('tipoNomina').value = athlete.tipoNomina;
-                
-                // CARGAR NUEVOS CAMPOS DE PAGO
                 document.getElementById('montoPagoMensual').value = athlete.montoPagoMensual || 0;
                 document.getElementById('fechaUltimoPago').value = athlete.fechaUltimoPago || '';
 
