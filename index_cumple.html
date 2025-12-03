@@ -3,315 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Voley - Cumpleañeros</title>
-    <!-- Carga de Tailwind CSS para el diseño moderno -->
+    <title>Cumpleaños del Mes - LVMEL</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Configuración personalizada de Tailwind para colores y fuente -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'voley-blue': '#1e40af', // Azul fuerte (Blue 800)
-                        'voley-dark': '#1e3a8a', // Azul oscuro (Blue 900)
-                        'voley-light': '#eff6ff', // Azul muy claro (Blue 50)
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    
     <style>
+        /* Estilos personalizados del tema Azul Marino/Eléctrico */
+        :root {
+            --color-azul-marino: #001F3F;    /* Azul Marino */
+            --color-azul-electrico: #0074D9; /* Azul Eléctrico */
+            --color-fondo-claro: #f0f8ff;    /* Azure/Azul muy pálido */
+        }
         body {
             font-family: 'Inter', sans-serif;
+            background-color: var(--color-fondo-claro); /* Fondo Azul Pálido */
         }
-        .voley-gradient {
-            background-image: linear-gradient(135deg, #1e40af, #3b82f6);
+        .azul-marino-bg { background-color: var(--color-azul-marino); }
+        .azul-marino-hover:hover { background-color: #001a33; }
+        .azul-electrico-text { color: var(--color-azul-electrico); }
+        .rounded-xl { border-radius: 0.75rem; }
+        .shadow-lg-azul { box-shadow: 0 0 20px -5px rgba(0, 31, 63, 0.4); }
+        
+        /* Estilo para el BANNER (Altura ajustada a 250px) */
+        .banner-header {
+            background-image: url('img/banner.png'); 
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat;
+            min-height: 250px; 
+            width: 100%;
         }
     </style>
 </head>
-<body class="bg-voley-light font-sans min-h-screen flex flex-col">
-
-    <!-- Encabezado de la Aplicación -->
-    <header class="bg-voley-dark shadow-lg p-4 sticky top-0 z-10">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-white">
-                Control Voley <span class="text-voley-light text-xl">- Cumpleaños</span>
-            </h1>
-            <div class="flex items-center">
-                <span class="text-sm text-white/70 mr-4">Club: <span id="currentClubDisplay" class="font-semibold">Cargando...</span></span>
-                <!-- Botón de regreso al menú principal -->
-                <a href="index_menu.html" class="bg-voley-blue hover:bg-voley-blue/80 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-200 shadow-md">
-                    Regresar al Menú
+<body>
+    
+    <div class="banner-header"></div>
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-center border-b pb-4">
+            <div class="flex items-center space-x-4">
+                <a href="index_menu.html" class="text-gray-600 hover:text-azul-electrico transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
+                    </svg>
                 </a>
+                <h1 class="text-3xl font-extrabold text-gray-900">
+                    Cumpleaños de <span id="currentMonthDisplay" class="azul-electrico-text">Cargando Mes...</span>
+                </h1>
             </div>
-        </div>
-    </header>
+            <button onclick="logout()" class="mt-4 md:mt-0 py-2 px-4 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-200 shadow-md">
+                Cerrar Sesión
+            </button>
+        </header>
 
-    <!-- Contenido Principal -->
-    <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full">
-        
-        <div id="login-required" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md hidden" role="alert">
-            <p class="font-bold">Acceso Denegado</p>
-            <p>Necesitas iniciar sesión en el <span class="font-semibold">index.html</span> principal para acceder a los datos de los atletas.</p>
-        </div>
-        
-        <div id="birthday-view" class="hidden">
-            <!-- Título Dinámico -->
-            <h2 class="text-3xl font-extrabold text-voley-dark mb-6 border-b pb-2">
-                Cumpleañeros del mes de <span id="currentMonthName" class="text-voley-blue capitalize">...</span>
-            </h2>
-
-            <!-- Indicador de Carga/Estado -->
-            <p id="statusMessage" class="text-center p-4 text-lg text-gray-600 font-medium">Cargando datos de atletas...</p>
-
-            <!-- Contenedor de la Tabla -->
-            <div class="bg-white p-6 rounded-xl shadow-2xl overflow-x-auto border border-voley-blue/20">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-voley-light">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-voley-dark uppercase tracking-wider">Atleta</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-voley-dark uppercase tracking-wider">Día de Cumpleaños</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-voley-dark uppercase tracking-wider">Fecha Completa de Nacimiento</th>
-                        </tr>
-                    </thead>
-                    <tbody id="birthdaysTableBody" class="bg-white divide-y divide-gray-100">
-                        <!-- Las filas de cumpleaños se insertarán aquí -->
-                    </tbody>
-                </table>
+        <div class="bg-white p-6 rounded-xl shadow-lg-azul overflow-x-auto">
+            <h2 id="cumpleTitle" class="text-2xl font-bold mb-4 text-gray-800">Listado de Cumpleañeros</h2>
+            
+            <div id="cumpleanosList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <p id="loadingMessage" class="col-span-full text-center py-8 text-gray-500">Cargando lista de cumpleaños...</p>
             </div>
         </div>
 
-    </main>
+    </div>
 
-    <!-- Script de Firebase y Lógica -->
     <script type="module">
-        // Importaciones de Firebase SDK (v11.6.1)
+        // --- CONSTANTES ---
+        const ATHLETES_COLLECTION_NAME = 'club_athletes';
+
+        // --- Importaciones de Firebase ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, onSnapshot, collection, query, where, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Establecer nivel de log para depuración de Firestore
-        setLogLevel('Debug');
-
-        // --- Configuración de Firebase y Variables Globales ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const CLUB_ID_STORAGE_KEY = 'lvm_club_id'; 
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, collection, doc, onSnapshot, query, where, getDoc 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"; 
         
-        let firebaseConfig = {}; // Usaremos la configuración inyectada o la vacía si no está disponible.
-        
-        try {
-            if (typeof __firebase_config !== 'undefined') {
-                const injectedConfig = JSON.parse(__firebase_config);
-                if (injectedConfig && injectedConfig.apiKey) {
-                    firebaseConfig = injectedConfig;
-                }
-            }
-        } catch (e) {
-            console.error("Error al usar la configuración inyectada. Usando la configuración estática proporcionada.", e);
-        }
+        // --- Configuración de Firebase ---
+        const firebaseConfig = { 
+            apiKey: "AIzaSyB5RB7mm1j-0gjCNTUEJTkyEqLjyZ3C7ws",
+            authDomain: "datacontrolvoley-ff556.firebaseapp.com",
+            projectId: "datacontrolvoley-ff556",
+            storageBucket: "datacontrolvoley-ff556.firebasestorage.app",
+            messagingSenderId: "516409072606",
+            appId: "1:516409072606:web:132538dba358a077d71b4f" 
+        };
 
-        let app, db, auth;
-        let userId = null;
-        let isAuthReady = false; 
-        
-        // Inicializar el clubId con el valor persistente de localStorage
-        let currentClubId = localStorage.getItem(CLUB_ID_STORAGE_KEY); 
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // Elementos de UI
-        const statusMessage = document.getElementById('statusMessage');
-        const loginRequired = document.getElementById('login-required');
-        const birthdayView = document.getElementById('birthday-view');
-        const currentClubDisplay = document.getElementById('currentClubDisplay');
-        const currentMonthNameElement = document.getElementById('currentMonthName');
+        // --- Variables de Estado ---
+        let teamId = null;
+        const currentMonthDisplay = document.getElementById('currentMonthDisplay');
+        const cumpleanosList = document.getElementById('cumpleanosList');
+        const loadingMessage = document.getElementById('loadingMessage');
         
-        // --- Funciones de Utilidad ---
+        
+        // ====================================================================
+        // === 1. UTILIDADES Y LÓGICA DE FILTRADO =============================
+        // ====================================================================
 
         /**
-         * Obtiene el nombre del mes actual en español.
+         * Busca el Team ID único al que pertenece el usuario autenticado.
          */
-        function getLocalizedMonthName() {
-            const date = new Date();
-            return date.toLocaleString('es-ES', { month: 'long' });
-        }
-
-        /**
-         * Verifica si una fecha de nacimiento cae en el mes actual.
-         * @param {string} dateOfBirthString - Fecha de nacimiento en formato "YYYY-MM-DD".
-         * @returns {boolean} True si cumple este mes.
-         */
-        function isBirthdayThisMonth(dateOfBirthString) {
-            if (!dateOfBirthString || typeof dateOfBirthString !== 'string' || dateOfBirthString.length < 10) return false;
-            
-            // La fecha de nacimiento es YYYY-MM-DD. Extraemos MM (mes).
-            // ParseInt(substring(5, 7)) -> MM (1 a 12)
-            const dobMonth = parseInt(dateOfBirthString.substring(5, 7), 10); 
-            
-            // Date().getMonth() es 0-indexado (0 = Enero, 11 = Diciembre).
-            const currentMonthIndex = new Date().getMonth() + 1; // Convertir a 1-indexado
-
-            return dobMonth === currentMonthIndex;
-        }
-
-        /**
-         * Extrae el día del mes de una fecha en formato "YYYY-MM-DD".
-         */
-        function getBirthdayDay(dateOfBirthString) {
-            if (!dateOfBirthString || typeof dateOfBirthString !== 'string' || dateOfBirthString.length < 10) return 'N/A';
-            
-            // Extraemos el día (DD)
-            return parseInt(dateOfBirthString.substring(8, 10), 10);
-        }
-
-        // --- Inicialización y Autenticación de Firebase ---
-
-        async function setupFirebase() {
-            if (!currentClubId) {
-                currentClubDisplay.textContent = 'N/A';
-                statusMessage.textContent = '';
-                loginRequired.classList.remove('hidden');
-                return;
-            }
-            
-            currentClubDisplay.textContent = currentClubId;
-            birthdayView.classList.remove('hidden');
-
+        async function getTeamId(uid) {
+            if (!db) return null;
             try {
-                if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
-                    statusMessage.textContent = 'Error: Firebase no pudo inicializarse (configuración inválida o no inyectada).';
-                    isAuthReady = true;
-                    return;
+                const userDocRef = doc(db, "users", uid); 
+                const docSnap = await getDoc(userDocRef);
+
+                if (docSnap.exists() && docSnap.data().teamId) {
+                    return docSnap.data().teamId;
                 }
-
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                onAuthStateChanged(auth, (user) => {
-                    isAuthReady = true;
-                    if (user) {
-                        userId = user.uid;
-                        console.log("Firebase Auth listo. UserID:", userId);
-                        loadBirthdays(); // Iniciar la carga de datos
-                    } else {
-                        userId = null;
-                        console.log("Sesión anónima/no autenticada. UserID es null.");
-                        statusMessage.textContent = 'Esperando autenticación de Firebase...';
-                    }
-                });
-
-                // La autenticación anónima se usa para obtener un token de usuario para Firestore
-                await signInAnonymously(auth);
-
+                return null;
             } catch (error) {
-                console.error("Error CRÍTICO al inicializar o autenticar Firebase:", error);
-                statusMessage.textContent = `Error CRÍTICO de Firebase: ${error.code || error.message}. Revise la consola.`;
-                isAuthReady = true;
-                userId = null; 
+                console.error("Error al obtener el Team ID:", error);
+                return null;
             }
         }
         
-        // --- LÓGICA DE CARGA Y FILTRADO DE CUMPLEAÑOS ---
+        /**
+         * Determina si el atleta cumple años en el mes actual.
+         */
+        function isBirthdayThisMonth(dateOfBirth, currentMonth) {
+            if (!dateOfBirth) return false;
+            
+            // Crea un objeto Date. 'T00:00:00' es necesario para evitar problemas de zona horaria.
+            const birthMonth = new Date(dateOfBirth + 'T00:00:00').getMonth();
+            
+            // El mes de Date es 0-indexado (0=Enero, 11=Diciembre)
+            return birthMonth === currentMonth; 
+        }
 
-        let unsubscribeBirthdays = null; 
+        function getMonthName(monthIndex) {
+            const months = [
+                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+            ];
+            return months[monthIndex];
+        }
+
+        function calculateAge(dateOfBirth) {
+            if (!dateOfBirth) return 'N/A';
+            const birthDate = new Date(dateOfBirth);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDifference = today.getMonth() - birthDate.getMonth();
+            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        // ====================================================================
+        // === 2. GESTIÓN DE DATOS ============================================
+        // ====================================================================
 
         function loadBirthdays() {
-            if (unsubscribeBirthdays) {
-                unsubscribeBirthdays();
-                unsubscribeBirthdays = null;
-            }
-
-            if (!isAuthReady || !currentClubId || !db || !userId) {
-                statusMessage.textContent = 'Error: Base de datos no lista o club no seleccionado.';
+            if (!db || !teamId) {
+                console.error("No se pudo iniciar la carga: DB o teamId no disponibles.");
                 return;
             }
 
-            // 1. Mostrar mes actual en el título
-            const monthName = getLocalizedMonthName();
-            currentMonthNameElement.textContent = monthName;
-            statusMessage.textContent = `Buscando cumpleañeros de ${monthName}...`;
-            
-            const publicCollectionPath = `artifacts/${appId}/public/data/athletes`;
-            // Solo consultamos por el clubId, el filtro del mes se hace en el cliente
-            const q = query(
-                collection(db, publicCollectionPath),
-                where('clubId', '==', currentClubId)
-            );
+            // Consulta a Firestore: Trae todos los atletas del club actual
+            const q = query(collection(db, ATHLETES_COLLECTION_NAME), where("clubId", "==", teamId));
 
-            // Listener en tiempo real
-            unsubscribeBirthdays = onSnapshot(q, (snapshot) => {
-                const athletes = [];
-                snapshot.forEach((doc) => {
-                    athletes.push({ id: doc.id, ...doc.data() });
+            const currentMonth = new Date().getMonth();
+            currentMonthDisplay.textContent = getMonthName(currentMonth);
+
+            onSnapshot(q, (snapshot) => {
+                const birthdays = [];
+                snapshot.forEach(doc => {
+                    const athlete = { id: doc.id, ...doc.data() };
+                    
+                    // Filtra por mes en el cliente
+                    if (isBirthdayThisMonth(athlete.fechaNacimiento, currentMonth)) {
+                        birthdays.push(athlete);
+                    }
                 });
-                
-                // 2. Filtrar atletas por el mes actual (Client-Side Filtering)
-                const birthdaysThisMonth = athletes.filter(athlete => 
-                    isBirthdayThisMonth(athlete.fechaNacimiento)
-                );
-                
-                // 3. Ordenar por el día del cumpleaños
-                birthdaysThisMonth.sort((a, b) => 
-                    getBirthdayDay(a.fechaNacimiento) - getBirthdayDay(b.fechaNacimiento)
-                );
-
-                renderBirthdaysTable(birthdaysThisMonth);
-
+                renderBirthdays(birthdays);
             }, (error) => {
-                console.error("Error al escuchar cambios en Firestore:", error);
-                statusMessage.textContent = `Fallo de carga en tiempo real: ${error.message}. Verifica las reglas de seguridad.`;
+                console.error("Error al cargar atletas en tiempo real: ", error);
+                loadingMessage.textContent = "Error al cargar datos. Verifique la conexión.";
             });
         }
-        
-        /**
-         * Renderiza los atletas con cumpleaños en la tabla HTML.
-         */
-        function renderBirthdaysTable(birthdays) {
-            const tableBody = document.getElementById('birthdaysTableBody');
-            tableBody.innerHTML = ''; 
+
+        function renderBirthdays(birthdays) {
+            cumpleanosList.innerHTML = '';
             
             if (birthdays.length === 0) {
-                const monthName = getLocalizedMonthName();
-                statusMessage.textContent = `¡Parece que no hay cumpleaños registrados para ${monthName} en tu club!`;
-                tableBody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-gray-500 font-semibold">
-                    No se encontraron atletas con cumpleaños este mes.
-                </td></tr>`;
+                cumpleanosList.innerHTML = `
+                    <p class="col-span-full text-center py-8 text-gray-500">
+                        🎉 ¡No hay cumpleaños registrados para ${currentMonthDisplay.textContent}! 🎉
+                    </p>`;
                 return;
             }
-            
-            statusMessage.textContent = `Mostrando ${birthdays.length} cumpleañeros.`;
 
+            // Ordenar por el día de cumpleaños
+            birthdays.sort((a, b) => {
+                const dayA = new Date(a.fechaNacimiento).getDate();
+                const dayB = new Date(b.fechaNacimiento).getDate();
+                return dayA - dayB;
+            });
 
             birthdays.forEach(athlete => {
-                const day = getBirthdayDay(athlete.fechaNacimiento);
-                const fullDate = athlete.fechaNacimiento; // YYYY-MM-DD
-                const age = new Date().getFullYear() - new Date(fullDate).getFullYear();
+                // Se agrega 'T00:00:00' para que JavaScript interprete la fecha sin cambios de zona horaria
+                const birthDate = new Date(athlete.fechaNacimiento + 'T00:00:00'); 
+                const day = birthDate.getDate();
+                const age = calculateAge(athlete.fechaNacimiento);
 
-
-                const row = `
-                    <tr class="hover:bg-voley-light transition duration-150">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-voley-dark">
-                            ${athlete.nombre} ${athlete.apellido}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-lg">
-                            <span class="px-3 py-1 inline-flex text-xl leading-5 font-bold rounded-full bg-blue-500 text-white shadow-md">
-                                ${day}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${fullDate} (${age} años)
-                        </td>
-                    </tr>
+                const card = `
+                    <div class="bg-white border border-yellow-300 p-6 rounded-xl shadow-md flex items-center space-x-4 hover:shadow-lg transition duration-200">
+                        <div class="flex-shrink-0 p-3 rounded-full bg-yellow-400 text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.5 12.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM10 12.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3zM14.5 12.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clip-rule="evenodd" />
+                                <path d="M10 2a8 8 0 00-8 8c0 1.255.228 2.478.672 3.619l3.058-2.553a.75.75 0 011.028 1.077L3.6 15.688A7.994 7.994 0 0010 18a8 8 0 008-8h-3a5 5 0 01-5 5V5z" />
+                            </svg>
+                        </div>
+                        
+                        <div>
+                            <p class="text-xl font-bold azul-electrico-text">${athlete.nombre} ${athlete.apellido}</p>
+                            <p class="text-lg font-semibold text-gray-700">Día: <span class="text-red-600">${day}</span></p>
+                            <p class="text-sm text-gray-500">Cumple ${age + 1} años</p>
+                        </div>
+                    </div>
                 `;
-                tableBody.insertAdjacentHTML('beforeend', row);
+                cumpleanosList.insertAdjacentHTML('beforeend', card);
             });
         }
 
-        // --- Ejecución Inicial ---
-        setupFirebase();
 
+        // ====================================================================
+        // === 3. INICIALIZACIÓN Y AUTENTICACIÓN ==============================
+        // ====================================================================
+        
+        onAuthStateChanged(auth, async (user) => { 
+            if (user) {
+                const userId = user.uid; 
+                
+                // OBTENER EL TEAM ID
+                teamId = await getTeamId(userId);
+
+                if (teamId) {
+                    // Cargar la lista de cumpleaños usando el Team ID
+                    loadBirthdays();
+                } else {
+                    console.error("No se pudo obtener el Team ID. Redirigiendo.");
+                    await signOut(auth);
+                    window.location.href = 'index.html'; 
+                }
+
+            } else {
+                console.log("Sesión no encontrada. Redirigiendo a index.html");
+                window.location.href = 'index.html'; 
+            }
+        });
+
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                localStorage.removeItem('currentClub'); 
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error("Error al cerrar sesión:", error);
+            }
+        }
+        
     </script>
+
 </body>
 </html>
