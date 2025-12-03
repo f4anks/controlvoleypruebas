@@ -72,7 +72,7 @@
             <form id="athleteForm" onsubmit="handleFormSubmit(event)">
                 <input type="hidden" id="athleteId" value="">
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre(s)</label>
                         <input type="text" id="nombre" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
@@ -84,6 +84,10 @@
                     <div>
                         <label for="cedulaIdentidad" class="block text-sm font-medium text-gray-700">Cédula de Identidad</label>
                         <input type="text" id="cedulaIdentidad" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
+                    </div>
+                    <div>
+                        <label for="telefono" class="block text-sm font-medium text-gray-700">Teléfono</label>
+                        <input type="number" id="telefono" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico" placeholder="Ej: 0412xxxxxxx">
                     </div>
                 </div>
 
@@ -375,6 +379,7 @@
                 nombre: document.getElementById('nombre').value.trim(),
                 apellido: document.getElementById('apellido').value.trim(),
                 cedulaIdentidad: document.getElementById('cedulaIdentidad').value.trim(),
+                telefono: document.getElementById('telefono').value.trim(), // <--- CAMBIO AQUÍ
                 fechaNacimiento: document.getElementById('fechaNacimiento').value,
                 peso: parseFloat(document.getElementById('peso').value),
                 talla: parseFloat(document.getElementById('talla').value),
@@ -413,6 +418,7 @@
                 document.getElementById('nombre').value = athlete.nombre;
                 document.getElementById('apellido').value = athlete.apellido;
                 document.getElementById('cedulaIdentidad').value = athlete.cedulaIdentidad;
+                document.getElementById('telefono').value = athlete.telefono || ''; // <--- CAMBIO AQUÍ
                 document.getElementById('fechaNacimiento').value = athlete.fechaNacimiento;
                 document.getElementById('peso').value = athlete.peso;
                 document.getElementById('talla').value = athlete.talla;
