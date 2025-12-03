@@ -117,34 +117,3 @@
                 </div>
             </div>
         </div>
-
-        <div class="bg-white p-6 rounded-xl shadow-glow-azul overflow-x-auto">
-            <div id="loadingMessage" class="text-center text-gray-500 p-4">Cargando datos...</div>
-            
-            <table id="atletasTable" class="min-w-full custom-table divide-y divide-gray-200 hidden">
-                <thead>
-                    <tr>
-                        <th onclick="sortTable(0)">Cédula</th>
-                        <th onclick="sortTable(1)">Nombre Completo</th>
-                        <th onclick="sortTable(2)">Fecha Nac.</th>
-                        <th onclick="sortTable(3)">Categoría</th>
-                        <th onclick="sortTable(4)">Sexo</th>
-                        <th onclick="sortTable(5)">Solvencia</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="atletasBody" class="bg-white divide-y divide-gray-200">
-                    </tbody>
-            </table>
-            
-            <div id="noResultsMessage" class="text-center text-gray-500 p-4 hidden">
-                No se encontraron atletas que coincidan con los filtros aplicados.
-            </div>
-        </div>
-
-    </div>
-
-    <script type="module" src="script.js"></script>
-    
-</body>
-</html>
