@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">Ficha de Atleta - LVMEL</title>
+    <title id="pageTitle">Ficha de Atleta - Control Voley</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     
@@ -266,7 +266,7 @@
                     // Actualizar Títulos
                     const fullName = data.nombre + " " + data.apellido;
                     athleteNameTitle.textContent = fullName;
-                    document.getElementById('pageTitle').textContent = `Ficha de ${fullName}`;
+                    document.getElementById('pageTitle').textContent = `Ficha de ${fullName} - Control Voley`; // Corregido aquí también
 
                     // Llenar Datos Personales
                     document.getElementById('nombreApellido').textContent = fullName;
