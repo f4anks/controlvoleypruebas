@@ -19,7 +19,6 @@
             background-color: var(--color-fondo-claro); /* Fondo Azul Pálido */
         }
         .azul-marino-bg { background-color: var(--color-azul-marino); }
-        .azul-marino-hover:hover { background-color: #001a33; }
         .azul-electrico-text { color: var(--color-azul-electrico); }
         .rounded-xl { border-radius: 0.75rem; }
         .shadow-lg-azul { box-shadow: 0 0 20px -5px rgba(0, 31, 63, 0.4); }
@@ -33,6 +32,14 @@
             min-height: 250px; 
             width: 100%;
         }
+        /* Estilo para las tarjetas del menú */
+        .menu-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px -5px rgba(0, 31, 63, 0.6);
+        }
     </style>
 </head>
 <body>
@@ -40,62 +47,48 @@
     <div class="banner-header"></div>
     <div class="container mx-auto p-4 md:p-8">
         
-        <header class="mb-10 flex flex-col md:flex-row justify-between items-center border-b pb-4">
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-center border-b pb-4">
             <h1 class="text-3xl font-extrabold text-gray-900">
-                Bienvenido, <span id="clubNameDisplay" class="azul-electrico-text">Cargando...</span>
+                Menú Principal
             </h1>
             <button onclick="logout()" class="mt-4 md:mt-0 py-2 px-4 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-200 shadow-md">
                 Cerrar Sesión
             </button>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-            <a href="index_atletas.html" class="block bg-white p-6 rounded-xl shadow-lg-azul hover:shadow-xl hover:scale-[1.02] transition duration-300 transform">
-                <div class="flex items-center space-x-4">
-                    <div class="flex-shrink-0 p-3 rounded-full azul-marino-bg text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-xl font-bold azul-electrico-text">Gestión de Atletas</p>
-                        <p class="text-gray-500">Registrar, editar y ver la nómina.</p>
-                    </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <a href="index_atletas.html" class="menu-card bg-white p-6 rounded-xl shadow-lg-azul flex items-center space-x-4 border-l-4 border-azul-electrico">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-azul-electrico" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Gestión de Atletas</h2>
+                    <p class="text-gray-600 text-sm">Registro, edición y nómina del club.</p>
+                </div>
+            </a>
+            
+            <a href="index_ficha.html" class="menu-card bg-white p-6 rounded-xl shadow-lg-azul flex items-center space-x-4 border-l-4 border-azul-electrico">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-azul-electrico" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Fichas Técnicas</h2>
+                    <p class="text-gray-600 text-sm">Consulta de datos físicos y de pago por atleta.</p>
                 </div>
             </a>
 
-            <a href="index_cumple.html" class="block bg-white p-6 rounded-xl shadow-lg-azul hover:shadow-xl hover:scale-[1.02] transition duration-300 transform">
-                <div class="flex items-center space-x-4">
-                    <div class="flex-shrink-0 p-3 rounded-full azul-marino-bg text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M5.5 8a.5.5 0 01.5-.5h2a.5.5 0 010 1H6a.5.5 0 01-.5-.5zm2.5 0a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2a.5.5 0 01.5-.5zm-4 4a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2a.5.5 0 01.5-.5z"/>
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0 1 1 0 002 0zM7 9a1 1 0 00-1 1v1a1 1 0 102 0v-1a1 1 0 00-1-1zm6-1a1 1 0 00-1 1v1a1 1 0 102 0v-1a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-xl font-bold azul-electrico-text">Cumpleaños del Mes</p>
-                        <p class="text-gray-500">Verificar atletas que celebran este mes.</p>
-                    </div>
-                </div>
-            </a>
-
-            <a href="index_ficha.html" class="block bg-white p-6 rounded-xl shadow-lg-azul hover:shadow-xl hover:scale-[1.02] transition duration-300 transform">
-                <div class="flex items-center space-x-4">
-                    <div class="flex-shrink-0 p-3 rounded-full azul-marino-bg text-white">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0113 3.414L16.586 7A2 2 0 0118 8.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-xl font-bold azul-electrico-text">Fichas Técnicas</p>
-                        <p class="text-gray-500">Buscar y ver datos físicos y de contacto.</p>
-                    </div>
+            <a href="estad/index_estad.html" class="menu-card bg-white p-6 rounded-xl shadow-lg-azul flex items-center space-x-4 border-l-4 border-azul-electrico">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-azul-electrico" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-6v6m-4-2v4m-2-4h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Gestión de Estadísticas</h2>
+                    <p class="text-gray-600 text-sm">Registro y análisis de datos de juego.</p>
                 </div>
             </a>
             
             </div>
-
     </div>
 
     <script type="module">
@@ -115,28 +108,16 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const clubNameDisplay = document.getElementById('clubNameDisplay');
-
-        // Lógica de Autenticación
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // Si el usuario está logueado
-                let clubName = localStorage.getItem('currentClub') || 'Club';
-                
-                // Si es el primer login, usa el email como nombre por defecto
-                if (clubName === 'Club Principal' || clubName === 'Club' || !localStorage.getItem('currentClub')) {
-                    clubName = user.email ? user.email.split('@')[0].charAt(0).toUpperCase() + user.email.split('@')[0].slice(1) : 'Club Logueado';
-                    localStorage.setItem('currentClub', clubName);
-                }
-                clubNameDisplay.textContent = clubName;
-                
-            } else {
-                // Si no hay sesión, redirigir al login
+        
+        // Función de autenticación al cargar la página
+        onAuthStateChanged(auth, (user) => { 
+            if (!user) {
                 console.log("Sesión no encontrada. Redirigiendo a index.html");
                 window.location.href = 'index.html'; 
             }
         });
 
+        // Función para cerrar sesión
         window.logout = async function() {
             try {
                 await signOut(auth);
