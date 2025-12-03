@@ -35,7 +35,6 @@ onAuthStateChanged(auth, (user) => {
     if (!user) {
         window.location.href = 'index.html';
     } else {
-        // Ejecutar al cargar la página si el usuario está autenticado
         initializeForm();
     }
 });
@@ -46,16 +45,13 @@ onAuthStateChanged(auth, (user) => {
 
 async function initializeForm() {
     if (atletaIdEdit) {
-        // Estamos en modo EDICIÓN
         document.getElementById('formTitle').textContent = 'Editar Atleta Existente';
         submitButton.textContent = 'Guardar Cambios';
         await loadAtletaData(atletaIdEdit);
     } else {
-        // Estamos en modo REGISTRO
         document.getElementById('formTitle').textContent = 'Registro de Nuevo Atleta';
         submitButton.textContent = 'Registrar Atleta';
     }
-    // Asegurarse de que el botón de CI esté deshabilitado en edición
     document.getElementById('ci').disabled = !!atletaIdEdit;
 }
 
@@ -71,7 +67,6 @@ async function loadAtletaData(id) {
         if (docSnap.exists()) {
             const data = docSnap.data();
             
-            // Asignar los valores a los campos del formulario
             document.getElementById('nombre').value = data.nombre || '';
             document.getElementById('apellido').value = data.apellido || '';
             document.getElementById('ci').value = data.ci || '';
@@ -111,7 +106,7 @@ async function handleFormSubmit(event) {
     const data = {
         nombre: document.getElementById('nombre').value.trim(),
         apellido: document.getElementById('apellido').value.trim(),
-        ci: document.getElementById('ci').value.trim(), // Solo se usa en registro
+        ci: document.getElementById('ci').value.trim(), // Se usa solo en registro o como campo de edición
         fechaNac: document.getElementById('fechaNac').value,
         categoria: document.getElementById('categoria').value,
         sexo: document.getElementById('sexo').value,
@@ -127,14 +122,17 @@ async function handleFormSubmit(event) {
         if (atletaIdEdit) {
             // Modo EDICIÓN: Actualizar el documento existente
             const docRef = doc(db, "atletas", atletaIdEdit);
-            await updateDoc(docRef, data);
+            // IMPORTANTE: NO enviamos 'ci' en updateDoc, ya que no queremos cambiar el ID del documento
+            const updateData = { ...data };
+            delete updateData.ci; 
+            await updateDoc(docRef, updateData); 
             alert("¡Atleta actualizado exitosamente!");
         } else {
             // Modo REGISTRO: Crear nuevo documento (usando CI como ID)
             const newDocRef = doc(collection(db, "atletas"), data.ci);
             await setDoc(newDocRef, data);
             alert("¡Atleta registrado exitosamente!");
-            form.reset(); // Limpiar el formulario si fue registro
+            form.reset(); 
         }
         
         // Limpiar el ID de edición después de guardar y redirigir
@@ -143,7 +141,7 @@ async function handleFormSubmit(event) {
 
     } catch (error) {
         console.error("Error al guardar/actualizar el atleta:", error);
-        alert(`Ocurrió un error al procesar el registro/edición: ${error.message}`);
+        alert(`Ocurrió un error al procesar el registro/edición. Asegúrate de que la C.I. no esté duplicada en registro: ${error.message}`);
     } finally {
         submitButton.disabled = false;
         submitButton.textContent = (atletaIdEdit) ? 'Guardar Cambios' : 'Registrar Atleta';
@@ -155,12 +153,10 @@ async function handleFormSubmit(event) {
 // ====================================================================
 
 window.onload = function() {
-    // Cuando la página carga, inicializa el formulario
     initializeForm();
 };
 
 window.onbeforeunload = function() {
-    // Limpiar el ID de edición si el usuario abandona la página de edición por otro medio
     if (atletaIdEdit) {
         localStorage.removeItem('editAtletaId');
     }
