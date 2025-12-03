@@ -113,6 +113,17 @@
                         </select>
                     </div>
                 </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label for="montoPagoMensual" class="block text-sm font-medium text-gray-700">Nómina Mensual (Bs)</label>
+                        <input type="number" id="montoPagoMensual" step="0.01" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico" placeholder="Monto del pago mensual">
+                    </div>
+                    <div>
+                        <label for="fechaUltimoPago" class="block text-sm font-medium text-gray-700">Fecha Último Pago</label>
+                        <input type="date" id="fechaUltimoPago" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
+                    </div>
+                </div>
                 
                 <div class="flex space-x-4 mt-6">
                     <button type="submit" id="submitButton" class="py-2 px-4 azul-marino-bg text-white font-semibold rounded-lg shadow-md hover:bg-blue-900 transition duration-200">
@@ -143,6 +154,9 @@
                         <th onclick="sortAthletes('tipoNomina')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
                             Nómina <span id="sort-tipoNomina" class="sort-icon"></span>
                         </th>
+                        <th onclick="sortAthletes('fechaUltimoPago')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
+                            Solvencia <span id="sort-fechaUltimoPago" class="sort-icon"></span>
+                        </th>
                         <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider">
                             Acciones
                         </th>
@@ -150,7 +164,7 @@
                 </thead>
                 <tbody id="athletesTableBody" class="bg-white divide-y divide-gray-200">
                     <tr>
-                        <td colspan="5" class="px-6 py-4 text-center text-gray-500" id="loadingRow">Cargando atletas...</td>
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-500" id="loadingRow">Cargando atletas...</td>
                     </tr>
                 </tbody>
             </table>
@@ -185,7 +199,7 @@
 
         // --- Variables de Estado Globales ---
         let teamId = null;
-        let currentAthletes = []; // Almacena la lista actual de atletas
+        let currentAthletes = []; 
         let sortKey = 'nombre';
         let sortDirection = 'asc';
 
@@ -198,12 +212,9 @@
 
 
         // ====================================================================
-        // === 1. UTILIDADES Y AUTENTICACIÓN ==================================
+        // === 1. UTILIDADES Y CÁLCULOS =======================================
         // ====================================================================
 
-        /**
-         * Busca el Team ID único al que pertenece el usuario autenticado.
-         */
         async function getTeamId(uid) {
             if (!db) return null;
             try {
@@ -232,6 +243,30 @@
             return age;
         }
 
+        /**
+         * Calcula el estado de solvencia basado en la fecha del último pago.
+         * Solvente: Pago dentro de los últimos 30 días.
+         * Insolvente: Sin pago registrado o pago mayor a 30 días.
+         */
+        function calculateSolvencyStatus(fechaUltimoPago) {
+            if (!fechaUltimoPago) return { status: 'Insolvente', class: 'bg-red-100 text-red-800' };
+
+            const lastPaymentDate = new Date(fechaUltimoPago);
+            const today = new Date();
+            // Asegurar que solo comparamos fechas sin la hora (para evitar problemas de zona horaria)
+            lastPaymentDate.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0); 
+            
+            const oneDay = 1000 * 60 * 60 * 24;
+            const diffDays = Math.round((today - lastPaymentDate) / oneDay);
+
+            if (diffDays <= 30) {
+                return { status: 'Solvente', class: 'bg-green-100 text-green-800' };
+            } else {
+                return { status: 'Insolvente', class: 'bg-yellow-100 text-yellow-800' };
+            }
+        }
+
         // ====================================================================
         // === 2. LÓGICA DE ORDENAMIENTO (Sorting) =============================
         // ====================================================================
@@ -240,25 +275,27 @@
             let valA = a[sortKey];
             let valB = b[sortKey];
 
-            // Convertir para ordenar por Edad
             if (sortKey === 'fechaNacimiento') {
-                // Ordenar por fecha de nacimiento (los más jóvenes primero en DESC, más viejos en ASC)
                 valA = new Date(a.fechaNacimiento).getTime();
                 valB = new Date(b.fechaNacimiento).getTime();
-                // Si ordenamos por edad, invertimos la dirección para que 'asc' signifique 'más joven primero'
                 if (sortDirection === 'desc') {
                     return valA - valB; 
                 }
                 return valB - valA; 
             }
             
-            // Caso para Cédula (numérico)
+            // Ordenar por solvencia (fecha)
+            if (sortKey === 'fechaUltimoPago') {
+                // Las fechas vacías se consideran lo más insolvente (más antiguo/primero)
+                valA = a.fechaUltimoPago ? new Date(a.fechaUltimoPago).getTime() : 0;
+                valB = b.fechaUltimoPago ? new Date(b.fechaUltimoPago).getTime() : 0;
+            }
+            
             if (sortKey === 'cedulaIdentidad' && valA && valB) {
                  valA = parseInt(valA);
                  valB = parseInt(valB);
             }
 
-            // Ordenamiento estándar para strings y números
             if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
             if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
             return 0;
@@ -272,10 +309,8 @@
                 sortDirection = 'asc';
             }
 
-            // Limpiar íconos
             document.querySelectorAll('.sort-icon').forEach(span => span.textContent = '');
             
-            // Establecer nuevo ícono
             const icon = document.getElementById(`sort-${key}`);
             if (icon) {
                 icon.textContent = sortDirection === 'asc' ? ' ▲' : ' ▼';
@@ -296,7 +331,7 @@
             if (athletes.length === 0) {
                 athletesTableBody.innerHTML = `
                     <tr>
-                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">No hay atletas registrados en este club.</td>
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">No hay atletas registrados en este club.</td>
                     </tr>
                 `;
                 return;
@@ -304,6 +339,7 @@
 
             athletes.forEach(athlete => {
                 const age = calculateAge(athlete.fechaNacimiento);
+                const solvency = calculateSolvencyStatus(athlete.fechaUltimoPago); // <--- CÁLCULO DE SOLVENCIA
                 
                 let nominaClass = '';
                 switch (athlete.tipoNomina) {
@@ -330,6 +366,11 @@
                                 ${athlete.tipoNomina.charAt(0).toUpperCase() + athlete.tipoNomina.slice(1)}
                             </span>
                         </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${solvency.class}">
+                                ${solvency.status}
+                            </span>
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                             <a href="#" class="text-indigo-600 hover:text-indigo-900 transition" onclick="editAthlete('${athlete.id}', event)">Editar</a>
                             <a href="#" class="text-red-600 hover:text-red-900 transition" 
@@ -346,11 +387,9 @@
         // === 4. CRUD DE FIREBASE ============================================
         // ====================================================================
         
-        // Listener en tiempo real para la colección de atletas
         function listenToAthletes() {
             if (!db || !teamId) return;
 
-            // Consultar solo los atletas que tienen el teamId del usuario actual
             const q = query(collection(db, ATHLETES_COLLECTION_NAME), where("clubId", "==", teamId));
 
             onSnapshot(q, (snapshot) => {
@@ -358,7 +397,6 @@
                 snapshot.forEach(doc => {
                     currentAthletes.push({ id: doc.id, ...doc.data() });
                 });
-                // Ordenar y renderizar al recibir nuevos datos
                 currentAthletes.sort(compare);
                 renderAthletesTable(currentAthletes);
 
@@ -368,34 +406,35 @@
             });
         }
 
-        // Manejador del Formulario (Guardar/Actualizar)
         window.handleFormSubmit = async function(event) {
             event.preventDefault();
             
             const athleteId = document.getElementById('athleteId').value;
             
-            // Recoger datos del formulario
             const athleteData = {
                 nombre: document.getElementById('nombre').value.trim(),
                 apellido: document.getElementById('apellido').value.trim(),
                 cedulaIdentidad: document.getElementById('cedulaIdentidad').value.trim(),
-                telefono: document.getElementById('telefono').value.trim(), // <--- CAMBIO AQUÍ
+                telefono: document.getElementById('telefono').value.trim(),
                 fechaNacimiento: document.getElementById('fechaNacimiento').value,
                 peso: parseFloat(document.getElementById('peso').value),
                 talla: parseFloat(document.getElementById('talla').value),
                 tipoNomina: document.getElementById('tipoNomina').value,
-                clubId: teamId, // Asegurar el clubId en cada registro
+                
+                // NUEVOS CAMPOS DE PAGO
+                montoPagoMensual: parseFloat(document.getElementById('montoPagoMensual').value) || 0,
+                fechaUltimoPago: document.getElementById('fechaUltimoPago').value,
+                
+                clubId: teamId, 
                 updatedAt: new Date().toISOString()
             };
 
             try {
                 if (athleteId) {
-                    // MODO EDICIÓN
                     const athleteDocRef = doc(db, ATHLETES_COLLECTION_NAME, athleteId);
                     await updateDoc(athleteDocRef, athleteData);
                     alert('Atleta actualizado con éxito!');
                 } else {
-                    // MODO REGISTRO
                     athleteData.createdAt = new Date().toISOString();
                     await addDoc(collection(db, ATHLETES_COLLECTION_NAME), athleteData);
                     alert('Atleta registrado con éxito!');
@@ -408,7 +447,6 @@
             }
         }
 
-        // Cargar datos para edición
         window.editAthlete = function(id, event) {
             event.preventDefault();
             const athlete = currentAthletes.find(a => a.id === id);
@@ -418,19 +456,23 @@
                 document.getElementById('nombre').value = athlete.nombre;
                 document.getElementById('apellido').value = athlete.apellido;
                 document.getElementById('cedulaIdentidad').value = athlete.cedulaIdentidad;
-                document.getElementById('telefono').value = athlete.telefono || ''; // <--- CAMBIO AQUÍ
+                document.getElementById('telefono').value = athlete.telefono || '';
                 document.getElementById('fechaNacimiento').value = athlete.fechaNacimiento;
                 document.getElementById('peso').value = athlete.peso;
                 document.getElementById('talla').value = athlete.talla;
                 document.getElementById('tipoNomina').value = athlete.tipoNomina;
+                
+                // CARGAR NUEVOS CAMPOS DE PAGO
+                document.getElementById('montoPagoMensual').value = athlete.montoPagoMensual || 0;
+                document.getElementById('fechaUltimoPago').value = athlete.fechaUltimoPago || '';
+
 
                 formTitle.textContent = 'Editar Atleta: ' + athlete.nombre + ' ' + athlete.apellido;
                 submitButton.textContent = 'Actualizar Datos';
-                window.scrollTo(0, 0); // Desplazar al inicio del formulario
+                window.scrollTo(0, 0); 
             }
         }
 
-        // Eliminar atleta
         window.deleteAthlete = async function(id, name, event) {
             event.preventDefault();
             if (confirm(`¿Está seguro que desea eliminar a ${name}? Esta acción es irreversible.`)) {
@@ -445,7 +487,6 @@
             }
         }
 
-        // Reiniciar formulario
         window.resetForm = function() {
             athleteForm.reset();
             document.getElementById('athleteId').value = '';
@@ -462,13 +503,10 @@
             if (user) {
                 const userId = user.uid; 
                 
-                // OBTENER EL TEAM ID
                 teamId = await getTeamId(userId);
 
                 if (teamId) {
-                    // Iniciar la escucha de atletas después de obtener el teamId
                     listenToAthletes();
-                    // Ordenar inicialmente por nombre ascendente
                     sortAthletes('nombre'); 
                 } else {
                     console.error("No se pudo obtener el Team ID. Redirigiendo.");
