@@ -21,8 +21,15 @@
         .azul-marino-bg { background-color: var(--color-azul-marino); }
         .azul-electrico-text { color: var(--color-azul-electrico); }
         .rounded-xl { border-radius: 0.75rem; }
-        .shadow-lg-azul { box-shadow: 0 0 20px -5px rgba(0, 31, 63, 0.4); }
         
+        /* --- ESTILOS DE REFLEJO Y GLOW --- */
+        .shadow-glow-azul {
+            /* Sombra de caja normal + sombra que simula el resplandor */
+            box-shadow: 0 4px 10px rgba(0, 31, 63, 0.2), 
+                        0 0 20px rgba(0, 116, 217, 0.35); /* Azul Eléctrico para el glow */
+            border: 1px solid rgba(0, 116, 217, 0.2); /* Borde sutil azul */
+        }
+
         /* Estilo para el BANNER (Altura ajustada a 250px) */
         .banner-header {
             background-image: url('img/banner.png'); 
@@ -32,17 +39,23 @@
             min-height: 250px; 
             width: 100%;
         }
-        .table-header {
+
+        /* Estilos de la tabla (Mejora de la visualización) */
+        .custom-table th {
             background-color: var(--color-azul-marino);
             color: white;
-            text-align: left;
-        }
-        .sortable-header {
             cursor: pointer;
-            transition: color 0.2s;
+            padding: 10px;
         }
-        .sortable-header:hover {
-            color: #ccc;
+        .custom-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .custom-table tr:nth-child(even) {
+            background-color: #f7f9fc;
+        }
+        .custom-table tr:hover {
+            background-color: #e6f0ff;
         }
     </style>
 </head>
@@ -52,510 +65,86 @@
     <div class="container mx-auto p-4 md:p-8">
         
         <header class="mb-8 flex flex-col md:flex-row justify-between items-center border-b pb-4">
-            <div class="flex items-center space-x-4">
-                <a href="index_menu.html" class="text-gray-600 hover:text-azul-electrico transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
-                    </svg>
+            <h1 class="text-3xl font-extrabold text-gray-900">
+                <a href="index_menu.html" class="text-gray-500 hover:text-azul-electrico transition duration-150">
+                    &larr; Menú
                 </a>
-                <h1 class="text-3xl font-extrabold text-gray-900">
-                    Gestión de Atletas
-                </h1>
-            </div>
-            <button onclick="logout()" class="mt-4 md:mt-0 py-2 px-4 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-200 shadow-md">
-                Cerrar Sesión
+                / Nómina de Atletas
+            </h1>
+            <button onclick="window.location.href='frm_atletas.html'" 
+                    class="mt-4 md:mt-0 py-2 px-4 azul-marino-bg text-white font-semibold rounded-lg hover:bg-blue-900 transition duration-200 shadow-md">
+                + Registrar Nuevo Atleta
             </button>
         </header>
 
-        <div class="bg-white p-6 rounded-xl shadow-lg-azul mb-8">
-            <h2 id="formTitle" class="text-2xl font-bold mb-4 text-gray-800 azul-electrico-text">Registrar Nuevo Atleta</h2>
-            <form id="athleteForm" onsubmit="handleFormSubmit(event)">
-                <input type="hidden" id="athleteId" value="">
+        <div class="mb-6 p-4 bg-white rounded-xl shadow-md border border-gray-200">
+            <h3 class="text-xl font-semibold mb-3 text-gray-800">Búsqueda y Filtros</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                        <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre(s)</label>
-                        <input type="text" id="nombre" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
-                    </div>
-                    <div>
-                        <label for="apellido" class="block text-sm font-medium text-gray-700">Apellido(s)</label>
-                        <input type="text" id="apellido" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
-                    </div>
-                    <div>
-                        <label for="cedulaIdentidad" class="block text-sm font-medium text-gray-700">Cédula de Identidad</label>
-                        <input type="text" id="cedulaIdentidad" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
-                    </div>
-                    <div>
-                        <label for="telefono" class="block text-sm font-medium text-gray-700">Teléfono</label>
-                        <input type="number" id="telefono" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico" placeholder="Ej: 0412xxxxxxx">
-                    </div>
+                <div>
+                    <label for="searchInput" class="block text-sm font-medium text-gray-700">Buscar (Nombre/Cédula)</label>
+                    <input type="text" id="searchInput" onkeyup="aplicarFiltros()" 
+                           placeholder="Escribe para buscar..."
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-                    <div>
-                        <label for="nroCamiseta" class="block text-sm font-medium text-gray-700">Nro Camiseta</label>
-                        <input type="number" id="nroCamiseta" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico" placeholder="Ej: 10">
-                    </div>
-                    <div>
-                        <label for="fechaNacimiento" class="block text-sm font-medium text-gray-700">Fecha Nacimiento</label>
-                        <input type="date" id="fechaNacimiento" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
-                    </div>
-                    <div>
-                        <label for="peso" class="block text-sm font-medium text-gray-700">Peso (kg)</label>
-                        <input type="number" id="peso" step="0.1" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
-                    </div>
-                    <div>
-                        <label for="talla" class="block text-sm font-medium text-gray-700">Talla (m)</label>
-                        <input type="number" id="talla" step="0.01" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                    <div>
-                        <label for="tipoNomina" class="block text-sm font-medium text-gray-700">Tipo de Nómina</label>
-                        <select id="tipoNomina" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
-                            <option value="activo">Activo</option>
-                            <option value="suspendido">Suspendido</option>
-                            <option value="baja">Baja Temporal</option>
+                <div>
+                    <label for="filtroCategoria" class="block text-sm font-medium text-gray-700">Categoría</label>
+                    <select id="filtroCategoria" onchange="aplicarFiltros()"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
+                        <option value="">Todas</option>
                         </select>
-                    </div>
-                    <div>
-                        <label for="montoPagoMensual" class="block text-sm font-medium text-gray-700">Nómina Mensual (Bs)</label>
-                        <input type="number" id="montoPagoMensual" step="0.01" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico" placeholder="Monto del pago mensual">
-                    </div>
-                    <div>
-                        <label for="fechaUltimoPago" class="block text-sm font-medium text-gray-700">Fecha Último Pago</label>
-                        <input type="date" id="fechaUltimoPago" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
-                    </div>
                 </div>
-                
-                <div class="flex space-x-4 mt-6">
-                    <button type="submit" id="submitButton" class="py-2 px-4 azul-marino-bg text-white font-semibold rounded-lg shadow-md hover:bg-blue-900 transition duration-200">
-                        Guardar Atleta
-                    </button>
-                    <button type="button" onclick="resetForm()" class="py-2 px-4 bg-gray-300 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-400 transition duration-200">
-                        Nuevo / Cancelar Edición
-                    </button>
+
+                <div>
+                    <label for="filtroSexo" class="block text-sm font-medium text-gray-700">Sexo</label>
+                    <select id="filtroSexo" onchange="aplicarFiltros()"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
+                        <option value="">Todos</option>
+                        <option value="M">Masculino</option>
+                        <option value="F">Femenino</option>
+                    </select>
                 </div>
-            </form>
+
+                <div>
+                    <label for="filtroSolvencia" class="block text-sm font-medium text-gray-700">Solvencia de Pago</label>
+                    <select id="filtroSolvencia" onchange="aplicarFiltros()"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
+                        <option value="">Todos</option>
+                        <option value="Al día">Al día</option>
+                        <option value="Pendiente">Pendiente</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-lg-azul overflow-x-auto">
-            <h2 class="text-2xl font-bold mb-4 text-gray-800">Nómina del Club</h2>
+        <div class="bg-white p-6 rounded-xl shadow-glow-azul overflow-x-auto">
+            <div id="loadingMessage" class="text-center text-gray-500 p-4">Cargando datos...</div>
             
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="table-header">
+            <table id="atletasTable" class="min-w-full custom-table divide-y divide-gray-200 hidden">
+                <thead>
                     <tr>
-                        <th onclick="sortAthletes('nombre')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
-                            Nombre <span id="sort-nombre" class="sort-icon"></span>
-                        </th>
-                        <th onclick="sortAthletes('nroCamiseta')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
-                            Nro. Camiseta <span id="sort-nroCamiseta" class="sort-icon"></span>
-                        </th>
-                        <th onclick="sortAthletes('cedulaIdentidad')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
-                            Cédula <span id="sort-cedulaIdentidad" class="sort-icon"></span>
-                        </th>
-                        <th onclick="sortAthletes('fechaNacimiento')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
-                            Edad <span id="sort-fechaNacimiento" class="sort-icon"></span>
-                        </th>
-                        <th onclick="sortAthletes('tipoNomina')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
-                            Nómina <span id="sort-tipoNomina" class="sort-icon"></span>
-                        </th>
-                        <th onclick="sortAthletes('fechaUltimoPago')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
-                            Solvencia <span id="sort-fechaUltimoPago" class="sort-icon"></span>
-                        </th>
-                        <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider">
-                            Acciones
-                        </th>
+                        <th onclick="sortTable(0)">Cédula</th>
+                        <th onclick="sortTable(1)">Nombre Completo</th>
+                        <th onclick="sortTable(2)">Fecha Nac.</th>
+                        <th onclick="sortTable(3)">Categoría</th>
+                        <th onclick="sortTable(4)">Sexo</th>
+                        <th onclick="sortTable(5)">Solvencia</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody id="athletesTableBody" class="bg-white divide-y divide-gray-200">
-                    <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500" id="loadingRow">Cargando atletas...</td>
-                    </tr>
-                </tbody>
+                <tbody id="atletasBody" class="bg-white divide-y divide-gray-200">
+                    </tbody>
             </table>
+            
+            <div id="noResultsMessage" class="text-center text-gray-500 p-4 hidden">
+                No se encontraron atletas que coincidan con los filtros aplicados.
+            </div>
         </div>
 
     </div>
 
-    <script type="module">
-        // --- CONSTANTES ---
-        const ATHLETES_COLLECTION_NAME = 'club_athletes';
-
-        // --- Importaciones de Firebase ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { 
-            getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, deleteDoc, query, where, getDoc 
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"; 
-        
-        // --- Configuración de Firebase ---
-        const firebaseConfig = { 
-            apiKey: "AIzaSyB5RB7mm1j-0gjCNTUEJTkyEqLjyZ3C7ws",
-            authDomain: "datacontrolvoley-ff556.firebaseapp.com",
-            projectId: "datacontrolvoley-ff556",
-            storageBucket: "datacontrolvoley-ff556.firebasestorage.app",
-            messagingSenderId: "516409072606",
-            appId: "1:516409072606:web:132538dba358a077d71b4f" 
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // --- Variables de Estado Globales ---
-        let teamId = null;
-        let currentAthletes = []; 
-        let sortKey = 'nombre';
-        let sortDirection = 'asc';
-
-        // --- Elementos del DOM ---
-        const formTitle = document.getElementById('formTitle');
-        const athleteForm = document.getElementById('athleteForm');
-        const submitButton = document.getElementById('submitButton');
-        const athletesTableBody = document.getElementById('athletesTableBody');
-        const loadingRow = document.getElementById('loadingRow');
-
-
-        // ====================================================================
-        // === 1. UTILIDADES Y CÁLCULOS =======================================
-        // ====================================================================
-
-        async function getTeamId(uid) {
-            if (!db) return null;
-            try {
-                const userDocRef = doc(db, "users", uid); 
-                const docSnap = await getDoc(userDocRef);
-
-                if (docSnap.exists() && docSnap.data().teamId) {
-                    return docSnap.data().teamId;
-                }
-                return null;
-            } catch (error) {
-                console.error("Error al obtener el Team ID:", error);
-                return null;
-            }
-        }
-
-        function calculateAge(dateOfBirth) {
-            if (!dateOfBirth) return 'N/A';
-            const birthDate = new Date(dateOfBirth);
-            const today = new Date();
-            let age = today.getFullYear() - birthDate.getFullYear();
-            const monthDifference = today.getMonth() - birthDate.getMonth();
-            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-            }
-            return age;
-        }
-
-        /**
-         * Calcula el estado de solvencia basado en la fecha del último pago.
-         * Solvente: Pago dentro de los últimos 30 días.
-         * Insolvente: Sin pago registrado o pago mayor a 30 días.
-         */
-        function calculateSolvencyStatus(fechaUltimoPago) {
-            if (!fechaUltimoPago) return { status: 'Insolvente', class: 'bg-red-100 text-red-800' };
-
-            const lastPaymentDate = new Date(fechaUltimoPago);
-            const today = new Date();
-            // Asegurar que solo comparamos fechas sin la hora (para evitar problemas de zona horaria)
-            lastPaymentDate.setHours(0, 0, 0, 0);
-            today.setHours(0, 0, 0, 0); 
-            
-            const oneDay = 1000 * 60 * 60 * 24;
-            const diffDays = Math.round((today - lastPaymentDate) / oneDay);
-
-            if (diffDays <= 30) {
-                return { status: 'Solvente', class: 'bg-green-100 text-green-800' };
-            } else {
-                return { status: 'Insolvente', class: 'bg-yellow-100 text-yellow-800' };
-            }
-        }
-
-        // ====================================================================
-        // === 2. LÓGICA DE ORDENAMIENTO (Sorting) =============================
-        // ====================================================================
-
-        function compare(a, b) {
-            let valA = a[sortKey];
-            let valB = b[sortKey];
-
-            if (sortKey === 'fechaNacimiento') {
-                valA = new Date(a.fechaNacimiento).getTime();
-                valB = new Date(b.fechaNacimiento).getTime();
-                // Queremos edad ascendente (más joven primero) o descendente (más viejo primero)
-                // Fecha de nacimiento más reciente (mayor timestamp) = más joven
-                // Sort by date is tricky. For ASC (A-Z, 1-10) we want oldest first (lowest timestamp).
-                if (sortDirection === 'asc') {
-                    return valA - valB; 
-                }
-                return valB - valA; 
-            }
-            
-            if (sortKey === 'fechaUltimoPago') {
-                // Las fechas vacías se consideran lo más insolvente (más antiguo/primero)
-                valA = a.fechaUltimoPago ? new Date(a.fechaUltimoPago).getTime() : 0;
-                valB = b.fechaUltimoPago ? new Date(b.fechaUltimoPago).getTime() : 0;
-            }
-            
-            // ORDENAR POR CAMISETA (numérico)
-            if (sortKey === 'nroCamiseta' && valA && valB) {
-                 valA = parseInt(valA);
-                 valB = parseInt(valB);
-            }
-
-            if (sortKey === 'cedulaIdentidad' && valA && valB) {
-                 valA = parseInt(valA);
-                 valB = parseInt(valB);
-            }
-
-            if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
-            if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
-            return 0;
-        }
-
-        window.sortAthletes = function(key) {
-            if (sortKey === key) {
-                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                sortKey = key;
-                sortDirection = 'asc';
-            }
-
-            document.querySelectorAll('.sort-icon').forEach(span => span.textContent = '');
-            
-            const icon = document.getElementById(`sort-${key}`);
-            if (icon) {
-                icon.textContent = sortDirection === 'asc' ? ' ▲' : ' ▼';
-            }
-
-            currentAthletes.sort(compare);
-            renderAthletesTable(currentAthletes);
-        }
-
-        // ====================================================================
-        // === 3. RENDERIZADO DE TABLA ========================================
-        // ====================================================================
-
-        function renderAthletesTable(athletes) {
-            athletesTableBody.innerHTML = '';
-            loadingRow.style.display = 'none';
-
-            if (athletes.length === 0) {
-                athletesTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">No hay atletas registrados en este club.</td>
-                    </tr>
-                `;
-                return;
-            }
-
-            athletes.forEach(athlete => {
-                const age = calculateAge(athlete.fechaNacimiento);
-                const solvency = calculateSolvencyStatus(athlete.fechaUltimoPago); 
-                
-                let nominaClass = '';
-                switch (athlete.tipoNomina) {
-                    case 'activo':
-                        nominaClass = 'bg-green-100 text-green-800';
-                        break;
-                    case 'suspendido':
-                        nominaClass = 'bg-yellow-100 text-yellow-800';
-                        break;
-                    case 'baja':
-                        nominaClass = 'bg-red-100 text-red-800';
-                        break;
-                    default:
-                        nominaClass = 'bg-gray-100 text-gray-800';
-                }
-                
-                // Formatear Nro Camiseta
-                const jerseyNumber = athlete.nroCamiseta ? `<span class="text-lg font-bold">${athlete.nroCamiseta}</span>` : '-';
-
-
-                const row = `
-                    <tr class="hover:bg-gray-50 transition duration-150">
-                        <td class="px-6 py-4 whitespace-nowrap">${athlete.nombre} ${athlete.apellido}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center">${jerseyNumber}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${athlete.cedulaIdentidad || 'N/A'}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${age} años</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${nominaClass}">
-                                ${athlete.tipoNomina.charAt(0).toUpperCase() + athlete.tipoNomina.slice(1)}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${solvency.class}">
-                                ${solvency.status}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                            <a href="#" class="text-indigo-600 hover:text-indigo-900 transition" onclick="editAthlete('${athlete.id}', event)">Editar</a>
-                            <a href="#" class="text-red-600 hover:text-red-900 transition" 
-                               onclick="deleteAthlete('${athlete.id}', '${athlete.nombre + ' ' + athlete.apellido}', event)">Eliminar</a>
-                        </td>
-                    </tr>
-                `;
-                athletesTableBody.insertAdjacentHTML('beforeend', row);
-            });
-        }
-
-
-        // ====================================================================
-        // === 4. CRUD DE FIREBASE ============================================
-        // ====================================================================
-        
-        function listenToAthletes() {
-            if (!db || !teamId) return;
-
-            const q = query(collection(db, ATHLETES_COLLECTION_NAME), where("clubId", "==", teamId));
-
-            onSnapshot(q, (snapshot) => {
-                currentAthletes = [];
-                snapshot.forEach(doc => {
-                    currentAthletes.push({ id: doc.id, ...doc.data() });
-                });
-                currentAthletes.sort(compare);
-                renderAthletesTable(currentAthletes);
-
-            }, (error) => {
-                console.error("Error al cargar atletas en tiempo real: ", error);
-                loadingRow.textContent = "Error al cargar datos. Verifique la conexión.";
-            });
-        }
-
-        window.handleFormSubmit = async function(event) {
-            event.preventDefault();
-            
-            const athleteId = document.getElementById('athleteId').value;
-            
-            const athleteData = {
-                nombre: document.getElementById('nombre').value.trim(),
-                apellido: document.getElementById('apellido').value.trim(),
-                cedulaIdentidad: document.getElementById('cedulaIdentidad').value.trim(),
-                telefono: document.getElementById('telefono').value.trim(),
-                
-                // CAMPOS DE LA SEGUNDA FILA (incluyendo Nro Camiseta)
-                nroCamiseta: parseInt(document.getElementById('nroCamiseta').value) || 0,
-                fechaNacimiento: document.getElementById('fechaNacimiento').value,
-                peso: parseFloat(document.getElementById('peso').value),
-                talla: parseFloat(document.getElementById('talla').value),
-
-                // CAMPOS DE LA TERCERA FILA
-                tipoNomina: document.getElementById('tipoNomina').value,
-                montoPagoMensual: parseFloat(document.getElementById('montoPagoMensual').value) || 0,
-                fechaUltimoPago: document.getElementById('fechaUltimoPago').value,
-                
-                clubId: teamId, 
-                updatedAt: new Date().toISOString()
-            };
-
-            try {
-                if (athleteId) {
-                    const athleteDocRef = doc(db, ATHLETES_COLLECTION_NAME, athleteId);
-                    await updateDoc(athleteDocRef, athleteData);
-                    alert('Atleta actualizado con éxito!');
-                } else {
-                    athleteData.createdAt = new Date().toISOString();
-                    await addDoc(collection(db, ATHLETES_COLLECTION_NAME), athleteData);
-                    alert('Atleta registrado con éxito!');
-                }
-                resetForm();
-
-            } catch (error) {
-                console.error("Error al guardar el atleta:", error);
-                alert('Hubo un error al guardar los datos: ' + error.message);
-            }
-        }
-
-        window.editAthlete = function(id, event) {
-            event.preventDefault();
-            const athlete = currentAthletes.find(a => a.id === id);
-
-            if (athlete) {
-                document.getElementById('athleteId').value = athlete.id;
-                document.getElementById('nombre').value = athlete.nombre;
-                document.getElementById('apellido').value = athlete.apellido;
-                document.getElementById('cedulaIdentidad').value = athlete.cedulaIdentidad;
-                document.getElementById('telefono').value = athlete.telefono || '';
-                
-                // CARGAR CAMPOS DE LA SEGUNDA FILA (incluyendo Nro Camiseta)
-                document.getElementById('nroCamiseta').value = athlete.nroCamiseta || '';
-                document.getElementById('fechaNacimiento').value = athlete.fechaNacimiento;
-                document.getElementById('peso').value = athlete.peso;
-                document.getElementById('talla').value = athlete.talla;
-
-                // CARGAR CAMPOS DE LA TERCERA FILA
-                document.getElementById('tipoNomina').value = athlete.tipoNomina;
-                document.getElementById('montoPagoMensual').value = athlete.montoPagoMensual || 0;
-                document.getElementById('fechaUltimoPago').value = athlete.fechaUltimoPago || '';
-
-
-                formTitle.textContent = 'Editar Atleta: ' + athlete.nombre + ' ' + athlete.apellido;
-                submitButton.textContent = 'Actualizar Datos';
-                window.scrollTo(0, 0); 
-            }
-        }
-
-        window.deleteAthlete = async function(id, name, event) {
-            event.preventDefault();
-            if (confirm(`¿Está seguro que desea eliminar a ${name}? Esta acción es irreversible.`)) {
-                try {
-                    await deleteDoc(doc(db, ATHLETES_COLLECTION_NAME, id));
-                    alert('Atleta eliminado con éxito.');
-                    resetForm();
-                } catch (error) {
-                    console.error("Error al eliminar el atleta:", error);
-                    alert('Hubo un error al eliminar los datos: ' + error.message);
-                }
-            }
-        }
-
-        window.resetForm = function() {
-            athleteForm.reset();
-            document.getElementById('athleteId').value = '';
-            formTitle.textContent = 'Registrar Nuevo Atleta';
-            submitButton.textContent = 'Guardar Atleta';
-        }
-
-
-        // ====================================================================
-        // === 5. INICIALIZACIÓN Y AUTENTICACIÓN ==============================
-        // ====================================================================
-        
-        onAuthStateChanged(auth, async (user) => { 
-            if (user) {
-                const userId = user.uid; 
-                
-                teamId = await getTeamId(userId);
-
-                if (teamId) {
-                    listenToAthletes();
-                    sortAthletes('nombre'); 
-                } else {
-                    console.error("No se pudo obtener el Team ID. Redirigiendo.");
-                    await signOut(auth);
-                    window.location.href = 'index.html'; 
-                }
-
-            } else {
-                console.log("Sesión no encontrada. Redirigiendo a index.html");
-                window.location.href = 'index.html'; 
-            }
-        });
-
-        window.logout = async function() {
-            try {
-                await signOut(auth);
-                localStorage.removeItem('currentClub'); 
-                window.location.href = 'index.html';
-            } catch (error) {
-                console.error("Error al cerrar sesión:", error);
-            }
-        }
-    </script>
-
+    <script type="module" src="script.js"></script>
+    
 </body>
 </html>
