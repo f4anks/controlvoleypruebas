@@ -55,7 +55,7 @@
         
         <header class="mb-8 flex flex-col md:flex-row justify-between items-center border-b pb-4">
             <div class="flex items-center space-x-4">
-                <a href="index_atletas.html" class="text-gray-600 hover:text-azul-electrico transition">
+                <a href="index_ficha.html" class="text-gray-600 hover:text-azul-electrico transition">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
                     </svg>
@@ -185,9 +185,6 @@
 
         // Función de Proyección de Talla (SÓLO SIMULACIÓN)
         function calculateTallaProyeccion(talla) {
-            // Dado que no tenemos un campo de género o edad ósea,
-            // esta función es SOLO DEMOSTRATIVA y retorna la talla actual + un factor fijo.
-            // Para una proyección real, se necesitan algoritmos más complejos (ej: Tanner-Whitehouse).
             if (!talla || talla < 1.0) return 'N/A'; 
             
             // Retorna la talla actual + 5 cm (0.05 m) como una estimación simple y fija.
@@ -229,7 +226,7 @@
                     document.getElementById('cedulaIdentidad').textContent = data.cedulaIdentidad || 'N/A';
                     document.getElementById('fechaNacimiento').textContent = data.fechaNacimiento || 'N/A';
                     document.getElementById('edad').textContent = `${age} años`;
-                    // Nota: Aquí se deberían incluir Teléfono y otros datos si estuvieran en Firestore
+                    // Nota: Teléfono u otros datos de contacto irían aquí si están en Firestore
                     // document.getElementById('telefono').textContent = data.telefono || 'N/A'; 
 
                     document.getElementById('peso').textContent = `${data.peso.toFixed(1)} kg`;
@@ -266,14 +263,11 @@
                 return;
             }
 
-            // 2. Verificar Autenticación (y permisos, indirectamente via Reglas)
+            // 2. Verificar Autenticación (y permisos)
             onAuthStateChanged(auth, (user) => {
                 if (user) {
-                    // Si el usuario está logueado, intentar cargar los datos.
-                    // Las reglas de seguridad se encargarán de verificar el teamId.
                     loadAthleteData(athleteId);
                 } else {
-                    // Si no hay sesión, redirigir al login
                     window.location.href = 'index.html'; 
                 }
             });
