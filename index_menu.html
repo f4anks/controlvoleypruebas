@@ -1,163 +1,155 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menú Principal - Control Voley</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    
-    <style>
-        /* Estilos personalizados del tema Azul Marino/Eléctrico */
-        :root {
-            --color-azul-marino: #001F3F;    /* Azul Marino */
-            --color-azul-electrico: #0074D9; /* Azul Eléctrico */
-            --color-fondo-claro: #f0f8ff;    /* Azure/Azul muy pálido */
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--color-fondo-claro); /* Fondo Azul Pálido */
-        }
-        .azul-marino-bg { background-color: var(--color-azul-marino); }
-        .azul-electrico-text { color: var(--color-azul-electrico); }
-        .rounded-xl { border-radius: 0.75rem; }
-        
-        /* --- ESTILOS DE REFLEJO Y GLOW (COPIA DEL INDEX) --- */
-        .shadow-glow-azul {
-            /* Sombra de caja normal + sombra que simula el resplandor */
-            box-shadow: 0 4px 10px rgba(0, 31, 63, 0.2), 
-                        0 0 20px rgba(0, 116, 217, 0.35); /* Azul Eléctrico para el glow */
-            border: 1px solid rgba(0, 116, 217, 0.2); /* Borde sutil azul */
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú Principal - Control Voley</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Estilos personalizados del tema Azul Marino/Eléctrico */
+        :root {
+            --color-azul-marino: #001F3F;    /* Azul Marino */
+            --color-azul-electrico: #0074D9; /* Azul Eléctrico */
+            --color-fondo-claro: #f0f8ff;    /* Azure/Azul muy pálido */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-fondo-claro); /* Fondo Azul Pálido */
+        }
+        .azul-marino-bg { background-color: var(--color-azul-marino); }
+        .azul-electrico-text { color: var(--color-azul-electrico); }
+        .rounded-xl { border-radius: 0.75rem; }
+        
+        /* --- ESTILOS DE REFLEJO Y GLOW (COPIA DEL INDEX) --- */
+        .shadow-glow-azul {
+            /* Sombra de caja normal + sombra que simula el resplandor */
+            box-shadow: 0 4px 10px rgba(0, 31, 63, 0.2), 
+                        0 0 20px rgba(0, 116, 217, 0.35); /* Azul Eléctrico para el glow */
+            border: 1px solid rgba(0, 116, 217, 0.2); /* Borde sutil azul */
+        }
 
-        /* Estilo para el BANNER (Altura ajustada a 250px) */
-        .banner-header {
-            background-image: url('img/banner.png'); 
-            background-size: cover; 
-            background-position: center; 
-            background-repeat: no-repeat;
-            min-height: 250px; 
-            width: 100%;
-        }
-        
-        /* Estilo para las tarjetas del menú (COMBINADO CON GLOW) */
-        .menu-card {
-            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
-            border-left: 4px solid var(--color-azul-electrico); /* Mantener el borde azul a la izquierda */
-        }
-        .menu-card:hover {
-            transform: translateY(-5px);
-            /* Aumentar el glow y el borde al pasar el ratón */
-            box-shadow: 0 10px 25px rgba(0, 31, 63, 0.3), 
-                        0 0 35px rgba(0, 116, 217, 0.6); /* Más intenso al hacer hover */
-            border-color: var(--color-azul-marino); 
-        }
-    </style>
+        /* Estilo para el BANNER (Altura ajustada a 250px) */
+        .banner-header {
+            background-image: url('img/banner.png'); 
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat;
+            min-height: 250px; 
+            width: 100%;
+        }
+        
+        /* Estilo para las tarjetas del menú (COMBINADO CON GLOW) */
+        .menu-card {
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+            border-left: 4px solid var(--color-azul-electrico); /* Mantener el borde azul a la izquierda */
+        }
+        .menu-card:hover {
+            transform: translateY(-5px);
+            /* Aumentar el glow y el borde al pasar el ratón */
+            box-shadow: 0 10px 25px rgba(0, 31, 63, 0.3), 
+                        0 0 35px rgba(0, 116, 217, 0.6); /* Más intenso al hacer hover */
+            border-color: var(--color-azul-marino); 
+        }
+    </style>
 </head>
 <body>
-    
-    <div class="banner-header"></div>
-    <div class="container mx-auto p-4 md:p-8">
-        
-        <header class="mb-8 flex flex-col md:flex-row justify-between items-center border-b pb-4">
-            <h1 class="text-3xl font-extrabold text-gray-900">
-                Menú Principal
-            </h1>
-            <button onclick="logout()" class="mt-4 md:mt-0 py-2 px-4 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-200 shadow-md">
-                Cerrar Sesión
-            </button>
-        </header>
+    
+    <div class="banner-header"></div>
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-center border-b pb-4">
+            <h1 class="text-3xl font-extrabold text-gray-900">
+                Menú Principal
+            </h1>
+            <button onclick="logout()" class="mt-4 md:mt-0 py-2 px-4 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-200 shadow-md">
+                Cerrar Sesión
+            </button>
+        </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            
-            <a href="index_atletas.html" class="menu-card bg-white p-6 rounded-xl shadow-glow-azul flex items-center space-x-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-azul-electrico" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                </svg>
-                <div>
-                    <h2 class="text-xl font-bold text-gray-800">Gestión de Atletas</h2>
-                    <p class="text-gray-600 text-sm">Registro, edición y nómina del club.</p>
-                </div>
-            </a>
-            
-            <a href="index_ficha.html" class="menu-card bg-white p-6 rounded-xl shadow-glow-azul flex items-center space-x-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-azul-electrico" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                <div>
-                    <h2 class="text-xl font-bold text-gray-800">Fichas Técnicas</h2>
-                    <p class="text-gray-600 text-sm">Consulta de datos físicos y de pago por atleta.</p>
-                </div>
-            </a>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            
+            <a href="index_atletas.html" class="menu-card bg-white p-6 rounded-xl shadow-glow-azul flex items-center space-x-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-azul-electrico" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Gestión de Atletas</h2>
+                    <p class="text-gray-600 text-sm">Registro, edición y nómina del club.</p>
+                </div>
+            </a>
+            
+            <a href="index_ficha.html" class="menu-card bg-white p-6 rounded-xl shadow-glow-azul flex items-center space-x-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-azul-electrico" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Fichas Técnicas</h2>
+                    <p class="text-gray-600 text-sm">Consulta de datos físicos y de pago por atleta.</p>
+                </div>
+            </a>
 
-            <a href="index_cumple.html" class="menu-card bg-white p-6 rounded-xl shadow-glow-azul flex items-center space-x-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-azul-electrico" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.126-1.554.372l-4.2-3.6 4.2-3.6c.508.246 1.031.372 1.554.372h.001v-2h-.001c-1.745 0-3.489-.436-5.112-1.3l-5.6 4.8-5.6-4.8c-1.623.864-3.367 1.3-5.112 1.3h-.001v2h.001c.523 0 1.046.126 1.554.372l4.2 3.6-4.2 3.6c-.508-.246-1.031-.372-1.554-.372h-.001v2h.001c1.745 0 3.489.436 5.112 1.3l5.6-4.8 5.6 4.8c1.623-.864 3.367-1.3 5.112-1.3h.001v-2h-.001z"/>
-                </svg>
-                <div>
-                    <h2 class="text-xl font-bold text-gray-800">Próximos Cumpleaños</h2>
-                    <p class="text-gray-600 text-sm">Listado de atletas con fecha de cumpleaños.</p>
-                </div>
-            </a>
+            <a href="index_cumple.html" class="menu-card bg-white p-6 rounded-xl shadow-glow-azul flex items-center space-x-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-azul-electrico" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.126-1.554.372l-4.2-3.6 4.2-3.6c.508.246 1.031.372 1.554.372h.001v-2h-.001c-1.745 0-3.489-.436-5.112-1.3l-5.6 4.8-5.6-4.8c-1.623.864-3.367 1.3-5.112 1.3h-.001v2h.001c.523 0 1.046.126 1.554.372l4.2 3.6-4.2 3.6c-.508-.246-1.031-.372-1.554-.372h-.001v2h.001c1.745 0 3.489.436 5.112 1.3l5.6-4.8 5.6 4.8c1.623-.864 3.367-1.3 5.112-1.3h.001v-2h-.001z"/>
+                </svg>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Próximos Cumpleaños</h2>
+                    <p class="text-gray-600 text-sm">Listado de atletas con fecha de cumpleaños.</p>
+                </div>
+            </a>
 
-            <a href="estad/index_estad.html" class="menu-card bg-white p-6 rounded-xl shadow-glow-azul flex items-center space-x-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-azul-electrico" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-6v6m-4-2v4m-2-4h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                </svg>
-                <div>
-                    <h2 class="text-xl font-bold text-gray-800">Gestión de Estadísticas</h2>
-                    <p class="text-gray-600 text-sm">Registro y análisis de datos de juego.</p>
-                </div>
-            </a>
-            
-        </div>
-    </div>
+            <a href="estad/index_estad.html" class="menu-card bg-white p-6 rounded-xl shadow-glow-azul flex items-center space-x-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-azul-electrico" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-6v6m-4-2v4m-2-4h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Gestión de Estadísticas</h2>
+                    <p class="text-gray-600 text-sm">Registro y análisis de datos de juego.</p>
+                </div>
+            </a>
+            
+        </div>
+    </div>
 
-        <script>
-        document.addEventListener('contextmenu', function(e) {
-            // Previene el comportamiento predeterminado (mostrar el menú contextual)
-            e.preventDefault();
-        });
-    </script>
+    <script type="module">
+        // --- Importaciones de Firebase ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        // --- Configuración de Firebase ---
+        const firebaseConfig = { 
+            apiKey: "AIzaSyB5RB7mm1j-0gjCNTUEJTkyEqLjyZ3C7ws",
+            authDomain: "datacontrolvoley-ff556.firebaseapp.com",
+            projectId: "datacontrolvoley-ff556",
+            storageBucket: "datacontrolvoley-ff556.firebasestorage.app",
+            messagingSenderId: "516409072606",
+            appId: "1:516409072606:web:132538dba358a077d71b4f" 
+        };
 
-    <script type="module">
-        // --- Importaciones de Firebase ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        
-        // --- Configuración de Firebase ---
-        const firebaseConfig = { 
-            apiKey: "AIzaSyB5RB7mm1j-0gjCNTUEJTkyEqLjyZ3C7ws",
-            authDomain: "datacontrolvoley-ff556.firebaseapp.com",
-            projectId: "datacontrolvoley-ff556",
-            storageBucket: "datacontrolvoley-ff556.firebasestorage.app",
-            messagingSenderId: "516409072606",
-            appId: "1:516409072606:web:132538dba358a077d71b4f" 
-        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        
+        // Función de autenticación al cargar la página
+        onAuthStateChanged(auth, (user) => { 
+            if (!user) {
+                console.log("Sesión no encontrada. Redirigiendo a index.html");
+                window.location.href = 'index.html'; 
+            }
+        });
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        
-        // Función de autenticación al cargar la página
-        onAuthStateChanged(auth, (user) => { 
-            if (!user) {
-                console.log("Sesión no encontrada. Redirigiendo a index.html");
-                window.location.href = 'index.html'; 
-            }
-        });
-
-        // Función para cerrar sesión
-        window.logout = async function() {
-            try {
-                await signOut(auth);
-                localStorage.removeItem('currentClub'); 
-                window.location.href = 'index.html';
-            } catch (error) {
-                console.error("Error al cerrar sesión:", error);
-            }
-        }
-    </script>
+        // Función para cerrar sesión
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                localStorage.removeItem('currentClub'); 
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error("Error al cerrar sesión:", error);
+            }
+        }
+    </script>
 
 </body>
 </html>
-
