@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buscar Ficha - LVMEL</title>
+    <title>Buscar Ficha - Control Voley</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     
@@ -16,7 +16,7 @@
         }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--color-fondo-claro); 
+            background-color: var(--color-fondo-claro);  
         }
         .azul-marino-bg { background-color: var(--color-azul-marino); }
         .azul-electrico-text { color: var(--color-azul-electrico); }
@@ -62,8 +62,8 @@
             <h2 class="text-2xl font-bold mb-4 text-gray-800">Selecciona un Atleta</h2>
             
             <input type="text" id="searchAthlete" placeholder="Buscar por nombre o cédula..." 
-                   onkeyup="filterAthletes()" 
-                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-3 mb-6 focus:ring-azul-electrico focus:border-azul-electrico">
+                    onkeyup="filterAthletes()" 
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-3 mb-6 focus:ring-azul-electrico focus:border-azul-electrico">
 
             <div id="athletesListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[500px] overflow-y-auto">
                 <p id="loadingMessage" class="col-span-full text-center py-8 text-gray-500">Cargando nómina...</p>
@@ -189,57 +189,4 @@
                     <div onclick="redirectToAthleteData('${athlete.id}')" 
                          class="athlete-card cursor-pointer bg-white p-4 rounded-lg shadow-md border-l-4 border-azul-electrico transition duration-200">
                         <p class="text-lg font-bold azul-electrico-text">${athlete.nombre} ${athlete.apellido}</p>
-                        <p class="text-sm text-gray-600">CI: ${athlete.cedulaIdentidad || 'N/A'}</p>
-                        <p class="text-sm text-gray-500">Edad: ${age} años</p>
-                        <span class="inline-block mt-2 text-xs font-semibold text-gray-700">Ver Ficha →</span>
-                    </div>
-                `;
-                athletesListContainer.insertAdjacentHTML('beforeend', card);
-            });
-        }
-        
-        // Función de redirección global
-        window.redirectToAthleteData = function(athleteId) {
-            window.location.href = `index_datos.html?id=${athleteId}`;
-        }
-
-
-        // ====================================================================
-        // === 3. INICIALIZACIÓN ==============================================
-        // ====================================================================
-        
-        onAuthStateChanged(auth, async (user) => { 
-            if (user) {
-                const userId = user.uid; 
-                
-                teamId = await getTeamId(userId);
-
-                if (teamId) {
-                    loadingMessage.textContent = "Cargando atletas...";
-                    loadAthletes();
-                } else {
-                    console.error("No se pudo obtener el Team ID. Redirigiendo.");
-                    await signOut(auth);
-                    window.location.href = 'index.html'; 
-                }
-
-            } else {
-                console.log("Sesión no encontrada. Redirigiendo a index.html");
-                window.location.href = 'index.html'; 
-            }
-        });
-
-        window.logout = async function() {
-            try {
-                await signOut(auth);
-                localStorage.removeItem('currentClub'); 
-                window.location.href = 'index.html';
-            } catch (error) {
-                console.error("Error al cerrar sesión:", error);
-            }
-        }
-        
-    </script>
-
-</body>
-</html>
+                        <p class="text-sm text-gray-600
