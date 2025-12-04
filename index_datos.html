@@ -81,7 +81,8 @@
                     <div><span class="data-label">Teléfono:</span> <span id="telefono" class="data-value"></span></div>
                     <div><span class="data-label">Fecha de Nacimiento:</span> <span id="fechaNacimiento" class="data-value"></span></div>
                     <div><span class="data-label">Edad Actual:</span> <span id="edad" class="data-value"></span></div>
-                </div>
+                    <div><span class="data-label">Nro Camiseta:</span> <span id="nroCamiseta" class="data-value font-bold text-xl azul-electrico-text"></span></div>
+                    </div>
                 
                 <h2 class="text-2xl font-bold mb-6 border-b pb-2 azul-electrico-text">Gestión de Pagos</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
@@ -271,6 +272,9 @@
                     document.getElementById('telefono').textContent = data.telefono || 'N/A'; 
                     document.getElementById('fechaNacimiento').textContent = data.fechaNacimiento || 'N/A';
                     document.getElementById('edad').textContent = `${age} años`;
+                    // INICIO: Asignar Nro Camiseta
+                    document.getElementById('nroCamiseta').textContent = data.nroCamiseta !== undefined ? data.nroCamiseta : 'N/A';
+                    // FIN: Asignar Nro Camiseta
                     
                     // Llenar Datos de Pagos (NUEVO)
                     document.getElementById('montoPagoMensual').textContent = `${(data.montoPagoMensual || 0).toFixed(2)}`;
