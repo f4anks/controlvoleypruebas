@@ -81,8 +81,12 @@
                     <div><span class="data-label">Teléfono:</span> <span id="telefono" class="data-value"></span></div>
                     <div><span class="data-label">Fecha de Nacimiento:</span> <span id="fechaNacimiento" class="data-value"></span></div>
                     <div><span class="data-label">Edad Actual:</span> <span id="edad" class="data-value"></span></div>
+                    
+                    <div><span class="data-label">Categoría:</span> <span id="categoria" class="data-value font-bold azul-electrico-text"></span></div>
+                    
                     <div><span class="data-label">Nro Camiseta:</span> <span id="nroCamiseta" class="data-value font-bold text-xl azul-electrico-text"></span></div>
-                    </div>
+                    
+                </div>
                 
                 <h2 class="text-2xl font-bold mb-6 border-b pb-2 azul-electrico-text">Gestión de Pagos</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
@@ -215,8 +219,6 @@
         
         /**
          * Calcula el estado de solvencia basado en la fecha del último pago.
-         * Solvente: Pago dentro de los últimos 30 días.
-         * Insolvente: Sin pago registrado o pago mayor a 30 días.
          */
         function calculateSolvencyStatus(fechaUltimoPago) {
             if (!fechaUltimoPago) return { status: 'Insolvente', class: 'bg-red-500 text-white' };
@@ -259,7 +261,7 @@
                     const imcStatus = getIMCStatus(imc);
                     const age = calculateAge(data.fechaNacimiento);
                     const tallaProyeccion = calculateTallaProyeccion(data.talla);
-                    const solvency = calculateSolvencyStatus(data.fechaUltimoPago); // <--- NUEVO CÁLCULO
+                    const solvency = calculateSolvencyStatus(data.fechaUltimoPago); 
                     
                     // Actualizar Títulos
                     const fullName = data.nombre + " " + data.apellido;
@@ -272,11 +274,13 @@
                     document.getElementById('telefono').textContent = data.telefono || 'N/A'; 
                     document.getElementById('fechaNacimiento').textContent = data.fechaNacimiento || 'N/A';
                     document.getElementById('edad').textContent = `${age} años`;
-                    // INICIO: Asignar Nro Camiseta
-                    document.getElementById('nroCamiseta').textContent = data.nroCamiseta !== undefined ? data.nroCamiseta : 'N/A';
-                    // FIN: Asignar Nro Camiseta
                     
-                    // Llenar Datos de Pagos (NUEVO)
+                    // Llenar Categoria (CAMBIO)
+                    document.getElementById('categoria').textContent = data.categoria || 'N/A';
+                    
+                    document.getElementById('nroCamiseta').textContent = data.nroCamiseta !== undefined ? data.nroCamiseta : 'N/A';
+                    
+                    // Llenar Datos de Pagos
                     document.getElementById('montoPagoMensual').textContent = `${(data.montoPagoMensual || 0).toFixed(2)}`;
                     document.getElementById('fechaUltimoPago').textContent = data.fechaUltimoPago || 'No Registrada';
                     document.getElementById('solvencyStatus').textContent = solvency.status;
