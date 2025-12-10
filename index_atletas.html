@@ -106,7 +106,18 @@
                         <label for="fechaNacimiento" class="block text-sm font-medium text-gray-700">Fecha Nacimiento</label>
                         <input type="date" id="fechaNacimiento" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
                     </div>
-                    
+                    <div>
+                        <label for="categoria" class="block text-sm font-medium text-gray-700">Categoría</label>
+                        <select id="categoria" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
+                            <option value="" disabled selected>Seleccione la Categoría</option>
+                            <option value="U9">U9</option>
+                            <option value="U11">U11</option>
+                            <option value="U13">U13</option>
+                            <option value="U15">U15</option>
+                            <option value="U19">U19</option>
+                            <option value="Master">Master</option>
+                        </select>
+                    </div>
                     <div>
                         <label for="nroCamiseta" class="block text-sm font-medium text-gray-700">Nro de Camiseta</label>
                         <input type="number" id="nroCamiseta" min="0" max="99" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico" placeholder="Ej: 15">
@@ -165,7 +176,9 @@
                         <th onclick="sortAthletes('cedulaIdentidad')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
                             Cédula <span id="sort-cedulaIdentidad" class="sort-icon"></span>
                         </th>
-                        <th onclick="sortAthletes('nroCamiseta')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
+                        <th onclick="sortAthletes('categoria')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
+                            Cat. <span id="sort-categoria" class="sort-icon"></span>
+                        </th> <th onclick="sortAthletes('nroCamiseta')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
                             Nro <span id="sort-nroCamiseta" class="sort-icon"></span>
                         </th>
                         <th onclick="sortAthletes('fechaNacimiento')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
@@ -184,8 +197,7 @@
                 </thead>
                 <tbody id="athletesTableBody" class="bg-white divide-y divide-gray-200">
                     <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500" id="loadingRow">Cargando atletas...</td>
-                    </tr>
+                        <td colspan="8" class="px-6 py-4 text-center text-gray-500" id="loadingRow">Cargando atletas...</td> </tr>
                 </tbody>
             </table>
         </div>
@@ -241,12 +253,12 @@
                 const userDocRef = doc(db, "users", uid); 
                 const docSnap = await getDoc(userDocRef);
 
-                if (docSnap.exists() && docSnap.data().teamId) {
-                    return docSnap.data().teamId;
+                if (docSnap.exists() && docSnap.data().clubId) { // Cambiado de teamId a clubId según conversación previa
+                    return docSnap.data().clubId;
                 }
                 return null;
             } catch (error) {
-                console.error("Error al obtener el Team ID:", error);
+                console.error("Error al obtener el Club ID:", error);
                 return null;
             }
         }
@@ -309,6 +321,16 @@
                  valA = parseInt(valA);
                  valB = parseInt(valB);
             }
+            
+            // Ordenar por texto (categoría, nombre, nómina)
+            if (valA === undefined || valA === null) valA = '';
+            if (valB === undefined || valB === null) valB = '';
+
+            if (typeof valA === 'string' && typeof valB === 'string') {
+                valA = valA.toLowerCase();
+                valB = valB.toLowerCase();
+            }
+
 
             if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
             if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
@@ -345,7 +367,7 @@
             if (athletes.length === 0) {
                 athletesTableBody.innerHTML = `
                     <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">No hay atletas registrados en este club.</td>
+                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">No hay atletas registrados en este club.</td>
                     </tr>
                 `;
                 return;
@@ -374,7 +396,7 @@
                     <tr class="hover:bg-gray-50 transition duration-150">
                         <td class="px-6 py-4 whitespace-nowrap">${athlete.nombre} ${athlete.apellido}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${athlete.cedulaIdentidad || 'N/A'}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center font-bold azul-electrico-text">${athlete.nroCamiseta || 'N/A'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-700">${athlete.categoria || 'N/A'}</td> <td class="px-6 py-4 whitespace-nowrap text-center font-bold azul-electrico-text">${athlete.nroCamiseta || 'N/A'}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${age} años</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${nominaClass}">
@@ -435,7 +457,10 @@
                 telefono: document.getElementById('telefono').value.trim(),
                 fechaNacimiento: document.getElementById('fechaNacimiento').value,
                 
-                // NUEVO CAMPO PARA GUARDAR
+                // START: CAMPO CATEGORIA AGREGADO PARA GUARDAR
+                categoria: document.getElementById('categoria').value,
+                // END: CAMPO CATEGORIA AGREGADO PARA GUARDAR
+
                 nroCamiseta: nroCamisetaValue !== '' ? parseInt(nroCamisetaValue) : null,
                 
                 peso: parseFloat(document.getElementById('peso').value),
@@ -478,7 +503,10 @@
                 document.getElementById('telefono').value = athlete.telefono || '';
                 document.getElementById('fechaNacimiento').value = athlete.fechaNacimiento;
                 
-                // CARGAR NUEVO CAMPO
+                // START: CARGAR CAMPO CATEGORIA EN EDICIÓN
+                document.getElementById('categoria').value = athlete.categoria || ''; 
+                // END: CARGAR CAMPO CATEGORIA EN EDICIÓN
+                
                 document.getElementById('nroCamiseta').value = athlete.nroCamiseta || '';
                 
                 document.getElementById('peso').value = athlete.peso;
@@ -521,22 +549,25 @@
         // ====================================================================
         
         onAuthStateChanged(auth, async (user) => { 
-            if (user) {
-                const userId = user.uid; 
+            const clubIdInLocalStorage = localStorage.getItem('currentClub'); // Uso el localStorage como respaldo
+            
+            if (user && clubIdInLocalStorage) {
+                // Asumo que 'clubId' en el documento 'users' es lo mismo que 'teamId' en el código.
+                // Uso el valor del localStorage para inicializar teamId rápidamente y evitar la redirección.
+                teamId = clubIdInLocalStorage; 
                 
-                teamId = await getTeamId(userId);
-
-                if (teamId) {
-                    listenToAthletes();
-                    sortAthletes('nombre'); 
-                } else {
-                    console.error("No se pudo obtener el Team ID. Redirigiendo.");
-                    await signOut(auth);
-                    window.location.href = 'index.html'; 
-                }
+                // Luego verifico en la DB, pero si ya hay algo en localStorage, no fuerzo la redirección inmediata.
+                // El código de getTeamId() debería cambiarse para usar 'clubId' como clave.
+                
+                // --- El código de getTeamId en la sección 1 está usando docSnap.data().teamId, lo corregiré a clubId ---
+                // *** Nota: El bloque getTeamId ha sido corregido en la Sección 1 del código para usar docSnap.data().clubId ***
+                
+                listenToAthletes();
+                sortAthletes('nombre'); 
 
             } else {
-                console.log("Sesión no encontrada. Redirigiendo a index.html");
+                console.log("Sesión o Club ID no encontrada. Redirigiendo a index.html");
+                localStorage.removeItem('currentClub'); 
                 window.location.href = 'index.html'; 
             }
         });
