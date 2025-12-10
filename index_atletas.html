@@ -224,7 +224,7 @@
         const db = getFirestore(app);
 
         // --- Variables de Estado Globales ---
-        let teamId = null; // Usado para el Club ID
+        let teamId = null; // teamId AHORA REPRESENTA EL ID DEL CLUB/EQUIPO
         let currentAthletes = []; 
         let sortKey = 'nombre';
         let sortDirection = 'asc';
@@ -241,19 +241,24 @@
         // === 1. UTILIDADES Y CÁLCULOS =======================================
         // ====================================================================
 
-        // Función para obtener el Club ID desde Firestore (USO ASÍNCRONO)
+        /**
+         * Función para obtener el ID del club/equipo desde Firestore.
+         * CORREGIDA para buscar el campo 'teamId' de tu base de datos.
+         */
         async function getClubIdFromFirestore(uid) {
             if (!db) return null;
             try {
                 const userDocRef = doc(db, "users", uid); 
                 const docSnap = await getDoc(userDocRef);
 
-                if (docSnap.exists() && docSnap.data().clubId) {
-                    return docSnap.data().clubId;
+                // <<<<<<<<<<<< CAMBIO CLAVE AQUÍ >>>>>>>>>>>>
+                if (docSnap.exists() && docSnap.data().teamId) { 
+                    return docSnap.data().teamId;
                 }
+                // <<<<<<<<<<<<<<< FIN CAMBIO >>>>>>>>>>>>>>>
                 return null;
             } catch (error) {
-                console.error("Error al obtener el Club ID de Firestore:", error);
+                console.error("Error al obtener el ID del Club/Equipo de Firestore:", error);
                 return null;
             }
         }
@@ -423,6 +428,8 @@
             // teamId es el Club ID obtenido en la inicialización
             if (!db || !teamId) return;
 
+            // <<<<<<<<<<<< CAMBIO CLAVE AQUÍ (La consulta usa 'clubId' en el documento del atleta) >>>>>>>>>>>>
+            // Asumiendo que guardaste 'clubId: teamId' en el atleta (ver handleFormSubmit)
             const q = query(collection(db, ATHLETES_COLLECTION_NAME), where("clubId", "==", teamId));
 
             onSnapshot(q, (snapshot) => {
@@ -453,7 +460,7 @@
                 telefono: document.getElementById('telefono').value.trim(),
                 fechaNacimiento: document.getElementById('fechaNacimiento').value,
                 
-                categoria: document.getElementById('categoria').value, // NUEVO CAMPO
+                categoria: document.getElementById('categoria').value, 
                 
                 nroCamiseta: nroCamisetaValue !== '' ? parseInt(nroCamisetaValue) : null,
                 
@@ -463,7 +470,7 @@
                 montoPagoMensual: parseFloat(document.getElementById('montoPagoMensual').value) || 0,
                 fechaUltimoPago: document.getElementById('fechaUltimoPago').value,
                 
-                clubId: teamId, // Usamos el teamId (Club ID) global
+                clubId: teamId, // Esto sigue siendo correcto: usamos la variable global 'teamId' como clubId
                 updatedAt: new Date().toISOString()
             };
 
@@ -497,7 +504,7 @@
                 document.getElementById('telefono').value = athlete.telefono || '';
                 document.getElementById('fechaNacimiento').value = athlete.fechaNacimiento;
                 
-                document.getElementById('categoria').value = athlete.categoria || ''; // Cargar Categoría
+                document.getElementById('categoria').value = athlete.categoria || ''; 
                 
                 document.getElementById('nroCamiseta').value = athlete.nroCamiseta || '';
                 
@@ -541,6 +548,7 @@
         // ====================================================================
         
         onAuthStateChanged(auth, async (user) => { 
+            // Esto asume que index.html guarda: localStorage.setItem('currentClub', 'sistemas');
             const clubIdInLocalStorage = localStorage.getItem('currentClub'); 
             
             // 1. Validación de Seguridad Rápida: ¿Hay usuario Y Club ID en localStorage?
@@ -554,14 +562,14 @@
             // 2. Si la validación rápida pasa, usamos el ID local
             teamId = clubIdInLocalStorage; 
 
-            // 3. Opcional: Revalidación asíncrona en Firestore (Más lento, pero robusto si localStorage es borrado)
-            // Esto es importante si el usuario puede borrar localStorage pero quiere seguir navegando.
+            // 3. Opcional/Recomendado: Revalidación asíncrona en Firestore para robustez.
             try {
+                // USA la función CORREGIDA que busca 'teamId'
                 const clubIdFromFirestore = await getClubIdFromFirestore(user.uid);
                 
                 if (clubIdFromFirestore !== teamId) {
                     console.error("Advertencia: El Club ID en localStorage no coincide con Firestore. Forzando re-login.");
-                    throw new Error("ID mismatch"); // Forzará el catch
+                    throw new Error("ID mismatch"); 
                 }
                 
                 // Si todo es correcto, inicia la escucha de datos
