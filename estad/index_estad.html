@@ -13,7 +13,10 @@
     <style>
       /* --- Colores de la paleta Control Voley --- */
       :root {
-        --color-main-bg: #004080; /* Azul Eléctrico Intenso (Fondo General) */
+        /* *** CAMBIO CLAVE: De Azul a Gris/Negro Oscuro Profesional *** */
+        --color-main-bg: #14171A; /* Gris/Negro Oscuro (Fondo General) */
+        /* ************************************************************ */
+        
         --color-card-bg: #ffffff; /* Blanco Puro (Fondo de Tarjeta) */
         --color-text-dark: #1f2937; /* Gris Oscuro (Texto Principal sobre fondo claro) */
         --color-primary-blue: #0056FF; /* Azul Eléctrico Brillante (Acción/Foco/Positivo) */
@@ -91,9 +94,10 @@
         width: 100%;
         max-width: 5xl;
         margin-top: 2rem;
-        border-top: 1px solid var(--color-primary-blue); /* Borde azul brillante */
+        /* El borde azul eléctrico sigue siendo el elemento de contraste del sistema */
+        border-top: 1px solid var(--color-primary-blue); 
         font-size: 0.875rem; 
-        color: #d1d5db; /* Texto claro */
+        color: #9ca3af; /* Texto claro ligeramente más oscuro */
       }
       footer strong {
         color: var(--color-card-bg); 
@@ -102,7 +106,7 @@
     </style>
   </head>
 
-  <body class="text-white min-h-screen flex flex-col items-center p-4">
+  <body class="text-gray-200 min-h-screen flex flex-col items-center p-4">
     <main class="w-full max-w-5xl mx-auto space-y-8 shadow-2xl">
       <header class="text-center relative text-white">
         <a href="../index_menu.html" class="absolute top-0 right-0 font-bold py-2 px-4 rounded-md transition-colors text-sm shadow-md" 
