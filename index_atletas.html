@@ -44,14 +44,6 @@
         .sortable-header:hover {
             color: #ccc;
         }
-        /* CLASE ADICIONAL PARA CENTRAR EL HEADER CORRECTAMENTE */
-        .header-controls {
-            flex-grow: 1; /* Permite que el contenedor del título ocupe el espacio */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
     </style>
 </head>
 <body>
@@ -178,7 +170,8 @@
                         </th>
                         <th onclick="sortAthletes('categoria')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
                             Cat. <span id="sort-categoria" class="sort-icon"></span>
-                        </th> <th onclick="sortAthletes('nroCamiseta')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
+                        </th>
+                        <th onclick="sortAthletes('nroCamiseta')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
                             Nro <span id="sort-nroCamiseta" class="sort-icon"></span>
                         </th>
                         <th onclick="sortAthletes('fechaNacimiento')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">
@@ -197,7 +190,8 @@
                 </thead>
                 <tbody id="athletesTableBody" class="bg-white divide-y divide-gray-200">
                     <tr>
-                        <td colspan="8" class="px-6 py-4 text-center text-gray-500" id="loadingRow">Cargando atletas...</td> </tr>
+                        <td colspan="8" class="px-6 py-4 text-center text-gray-500" id="loadingRow">Cargando atletas...</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -230,7 +224,7 @@
         const db = getFirestore(app);
 
         // --- Variables de Estado Globales ---
-        let teamId = null;
+        let teamId = null; // Usado para el Club ID
         let currentAthletes = []; 
         let sortKey = 'nombre';
         let sortDirection = 'asc';
@@ -247,18 +241,19 @@
         // === 1. UTILIDADES Y CÁLCULOS =======================================
         // ====================================================================
 
-        async function getTeamId(uid) {
+        // Función para obtener el Club ID desde Firestore (USO ASÍNCRONO)
+        async function getClubIdFromFirestore(uid) {
             if (!db) return null;
             try {
                 const userDocRef = doc(db, "users", uid); 
                 const docSnap = await getDoc(userDocRef);
 
-                if (docSnap.exists() && docSnap.data().clubId) { // Cambiado de teamId a clubId según conversación previa
+                if (docSnap.exists() && docSnap.data().clubId) {
                     return docSnap.data().clubId;
                 }
                 return null;
             } catch (error) {
-                console.error("Error al obtener el Club ID:", error);
+                console.error("Error al obtener el Club ID de Firestore:", error);
                 return null;
             }
         }
@@ -322,7 +317,7 @@
                  valB = parseInt(valB);
             }
             
-            // Ordenar por texto (categoría, nombre, nómina)
+            // Normalizar valores para comparación de texto (categoría, nombre, nómina)
             if (valA === undefined || valA === null) valA = '';
             if (valB === undefined || valB === null) valB = '';
 
@@ -330,7 +325,6 @@
                 valA = valA.toLowerCase();
                 valB = valB.toLowerCase();
             }
-
 
             if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
             if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
@@ -396,7 +390,8 @@
                     <tr class="hover:bg-gray-50 transition duration-150">
                         <td class="px-6 py-4 whitespace-nowrap">${athlete.nombre} ${athlete.apellido}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${athlete.cedulaIdentidad || 'N/A'}</td>
-                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-700">${athlete.categoria || 'N/A'}</td> <td class="px-6 py-4 whitespace-nowrap text-center font-bold azul-electrico-text">${athlete.nroCamiseta || 'N/A'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-700">${athlete.categoria || 'N/A'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center font-bold azul-electrico-text">${athlete.nroCamiseta || 'N/A'}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${age} años</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${nominaClass}">
@@ -425,6 +420,7 @@
         // ====================================================================
         
         function listenToAthletes() {
+            // teamId es el Club ID obtenido en la inicialización
             if (!db || !teamId) return;
 
             const q = query(collection(db, ATHLETES_COLLECTION_NAME), where("clubId", "==", teamId));
@@ -457,10 +453,8 @@
                 telefono: document.getElementById('telefono').value.trim(),
                 fechaNacimiento: document.getElementById('fechaNacimiento').value,
                 
-                // START: CAMPO CATEGORIA AGREGADO PARA GUARDAR
-                categoria: document.getElementById('categoria').value,
-                // END: CAMPO CATEGORIA AGREGADO PARA GUARDAR
-
+                categoria: document.getElementById('categoria').value, // NUEVO CAMPO
+                
                 nroCamiseta: nroCamisetaValue !== '' ? parseInt(nroCamisetaValue) : null,
                 
                 peso: parseFloat(document.getElementById('peso').value),
@@ -469,7 +463,7 @@
                 montoPagoMensual: parseFloat(document.getElementById('montoPagoMensual').value) || 0,
                 fechaUltimoPago: document.getElementById('fechaUltimoPago').value,
                 
-                clubId: teamId, 
+                clubId: teamId, // Usamos el teamId (Club ID) global
                 updatedAt: new Date().toISOString()
             };
 
@@ -503,9 +497,7 @@
                 document.getElementById('telefono').value = athlete.telefono || '';
                 document.getElementById('fechaNacimiento').value = athlete.fechaNacimiento;
                 
-                // START: CARGAR CAMPO CATEGORIA EN EDICIÓN
-                document.getElementById('categoria').value = athlete.categoria || ''; 
-                // END: CARGAR CAMPO CATEGORIA EN EDICIÓN
+                document.getElementById('categoria').value = athlete.categoria || ''; // Cargar Categoría
                 
                 document.getElementById('nroCamiseta').value = athlete.nroCamiseta || '';
                 
@@ -545,29 +537,44 @@
 
 
         // ====================================================================
-        // === 5. INICIALIZACIÓN Y AUTENTICACIÓN ==============================
+        // === 5. INICIALIZACIÓN Y AUTENTICACIÓN (Lógica Reforzada) ===========
         // ====================================================================
         
         onAuthStateChanged(auth, async (user) => { 
-            const clubIdInLocalStorage = localStorage.getItem('currentClub'); // Uso el localStorage como respaldo
+            const clubIdInLocalStorage = localStorage.getItem('currentClub'); 
             
-            if (user && clubIdInLocalStorage) {
-                // Asumo que 'clubId' en el documento 'users' es lo mismo que 'teamId' en el código.
-                // Uso el valor del localStorage para inicializar teamId rápidamente y evitar la redirección.
-                teamId = clubIdInLocalStorage; 
+            // 1. Validación de Seguridad Rápida: ¿Hay usuario Y Club ID en localStorage?
+            if (!user || !clubIdInLocalStorage) {
+                console.log("Sesión o Club ID no encontrada/válida. Redirigiendo a index.html");
+                localStorage.removeItem('currentClub'); 
+                window.location.href = 'index.html'; 
+                return; 
+            }
+
+            // 2. Si la validación rápida pasa, usamos el ID local
+            teamId = clubIdInLocalStorage; 
+
+            // 3. Opcional: Revalidación asíncrona en Firestore (Más lento, pero robusto si localStorage es borrado)
+            // Esto es importante si el usuario puede borrar localStorage pero quiere seguir navegando.
+            try {
+                const clubIdFromFirestore = await getClubIdFromFirestore(user.uid);
                 
-                // Luego verifico en la DB, pero si ya hay algo en localStorage, no fuerzo la redirección inmediata.
-                // El código de getTeamId() debería cambiarse para usar 'clubId' como clave.
+                if (clubIdFromFirestore !== teamId) {
+                    console.error("Advertencia: El Club ID en localStorage no coincide con Firestore. Forzando re-login.");
+                    throw new Error("ID mismatch"); // Forzará el catch
+                }
                 
-                // --- El código de getTeamId en la sección 1 está usando docSnap.data().teamId, lo corregiré a clubId ---
-                // *** Nota: El bloque getTeamId ha sido corregido en la Sección 1 del código para usar docSnap.data().clubId ***
-                
+                // Si todo es correcto, inicia la escucha de datos
                 listenToAthletes();
                 sortAthletes('nombre'); 
 
-            } else {
-                console.log("Sesión o Club ID no encontrada. Redirigiendo a index.html");
-                localStorage.removeItem('currentClub'); 
+            } catch (error) {
+                console.error("Error de autorización o ID no coincide:", error);
+                alert("Acceso denegado o sesión expirada. Por favor, vuelva a iniciar sesión.");
+                
+                // Forzar cierre de sesión y redirección
+                await signOut(auth);
+                localStorage.removeItem('currentClub');
                 window.location.href = 'index.html'; 
             }
         });
