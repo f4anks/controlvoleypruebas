@@ -130,8 +130,8 @@
                         <label for="tipoNomina" class="block text-sm font-medium text-gray-700">Tipo de Nómina</label>
                         <select id="tipoNomina" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
                             <option value="activo">Activo</option>
-                            <option value="suspendido">Suspendido</option>
-                            <option value="baja">Baja Temporal</option>
+                            <option value="suspendido">Reposo</option>
+                            <option value="baja">Suspendido</option>
                         </select>
                     </div>
                     <div>
@@ -224,7 +224,7 @@
         const db = getFirestore(app);
 
         // --- Variables de Estado Globales ---
-        let teamId = null; // teamId AHORA REPRESENTA EL ID DEL CLUB/EQUIPO
+        let teamId = null;
         let currentAthletes = []; 
         let sortKey = 'nombre';
         let sortDirection = 'asc';
@@ -243,22 +243,21 @@
 
         /**
          * Función para obtener el ID del club/equipo desde Firestore.
-         * CORREGIDA para buscar el campo 'teamId' de tu base de datos.
+         * Busca el campo 'teamId' en el documento del usuario.
          */
-        async function getClubIdFromFirestore(uid) {
+        async function getTeamId(uid) {
             if (!db) return null;
             try {
                 const userDocRef = doc(db, "users", uid); 
                 const docSnap = await getDoc(userDocRef);
 
-                // <<<<<<<<<<<< CAMBIO CLAVE AQUÍ >>>>>>>>>>>>
+                // ¡BUSCANDO 'teamId' de tu estructura de DB!
                 if (docSnap.exists() && docSnap.data().teamId) { 
                     return docSnap.data().teamId;
                 }
-                // <<<<<<<<<<<<<<< FIN CAMBIO >>>>>>>>>>>>>>>
                 return null;
             } catch (error) {
-                console.error("Error al obtener el ID del Club/Equipo de Firestore:", error);
+                console.error("Error al obtener el Team ID:", error);
                 return null;
             }
         }
@@ -382,6 +381,7 @@
                         nominaClass = 'bg-green-100 text-green-800';
                         break;
                     case 'suspendido':
+                    case 'reposo': // Añadir 'reposo' al caso si se usa
                         nominaClass = 'bg-yellow-100 text-yellow-800';
                         break;
                     case 'baja':
@@ -428,8 +428,7 @@
             // teamId es el Club ID obtenido en la inicialización
             if (!db || !teamId) return;
 
-            // <<<<<<<<<<<< CAMBIO CLAVE AQUÍ (La consulta usa 'clubId' en el documento del atleta) >>>>>>>>>>>>
-            // Asumiendo que guardaste 'clubId: teamId' en el atleta (ver handleFormSubmit)
+            // La consulta usa el campo 'clubId' en la colección club_athletes, filtrando por el teamId del usuario logueado.
             const q = query(collection(db, ATHLETES_COLLECTION_NAME), where("clubId", "==", teamId));
 
             onSnapshot(q, (snapshot) => {
@@ -450,7 +449,6 @@
             event.preventDefault();
             
             const athleteId = document.getElementById('athleteId').value;
-            
             const nroCamisetaValue = document.getElementById('nroCamiseta').value.trim();
 
             const athleteData = {
@@ -460,7 +458,7 @@
                 telefono: document.getElementById('telefono').value.trim(),
                 fechaNacimiento: document.getElementById('fechaNacimiento').value,
                 
-                categoria: document.getElementById('categoria').value, 
+                categoria: document.getElementById('categoria').value, // <-- Campo Categoría Agregado
                 
                 nroCamiseta: nroCamisetaValue !== '' ? parseInt(nroCamisetaValue) : null,
                 
@@ -470,7 +468,7 @@
                 montoPagoMensual: parseFloat(document.getElementById('montoPagoMensual').value) || 0,
                 fechaUltimoPago: document.getElementById('fechaUltimoPago').value,
                 
-                clubId: teamId, // Esto sigue siendo correcto: usamos la variable global 'teamId' como clubId
+                clubId: teamId, // Usamos la variable global teamId obtenida del login
                 updatedAt: new Date().toISOString()
             };
 
@@ -504,7 +502,7 @@
                 document.getElementById('telefono').value = athlete.telefono || '';
                 document.getElementById('fechaNacimiento').value = athlete.fechaNacimiento;
                 
-                document.getElementById('categoria').value = athlete.categoria || ''; 
+                document.getElementById('categoria').value = athlete.categoria || ''; // <-- Campo Categoría Cargado
                 
                 document.getElementById('nroCamiseta').value = athlete.nroCamiseta || '';
                 
@@ -544,45 +542,31 @@
 
 
         // ====================================================================
-        // === 5. INICIALIZACIÓN Y AUTENTICACIÓN (Lógica Reforzada) ===========
+        // === 5. INICIALIZACIÓN Y AUTENTICACIÓN ==============================
         // ====================================================================
         
         onAuthStateChanged(auth, async (user) => { 
-            // Esto asume que index.html guarda: localStorage.setItem('currentClub', 'sistemas');
-            const clubIdInLocalStorage = localStorage.getItem('currentClub'); 
-            
-            // 1. Validación de Seguridad Rápida: ¿Hay usuario Y Club ID en localStorage?
-            if (!user || !clubIdInLocalStorage) {
-                console.log("Sesión o Club ID no encontrada/válida. Redirigiendo a index.html");
-                localStorage.removeItem('currentClub'); 
-                window.location.href = 'index.html'; 
-                return; 
-            }
-
-            // 2. Si la validación rápida pasa, usamos el ID local
-            teamId = clubIdInLocalStorage; 
-
-            // 3. Opcional/Recomendado: Revalidación asíncrona en Firestore para robustez.
-            try {
-                // USA la función CORREGIDA que busca 'teamId'
-                const clubIdFromFirestore = await getClubIdFromFirestore(user.uid);
+            if (user) {
+                const userId = user.uid; 
                 
-                if (clubIdFromFirestore !== teamId) {
-                    console.error("Advertencia: El Club ID en localStorage no coincide con Firestore. Forzando re-login.");
-                    throw new Error("ID mismatch"); 
+                // 1. BUSCAR el ID del equipo/club en Firestore (campo 'teamId')
+                teamId = await getTeamId(userId); // <--- Aquí se produce la lectura clave
+
+                if (teamId) {
+                    // 2. Si se encuentra el ID, iniciar la escucha de datos
+                    listenToAthletes();
+                    sortAthletes('nombre'); 
+                } else {
+                    // 3. Si no se encuentra 'teamId', no tiene acceso: redirigir
+                    console.error("No se pudo obtener el Team ID. Redirigiendo a index.html");
+                    alert("Tu cuenta no está asociada a un club válido o el ID no fue encontrado. Redirigiendo al inicio de sesión.");
+                    await signOut(auth);
+                    window.location.href = 'index.html'; 
                 }
-                
-                // Si todo es correcto, inicia la escucha de datos
-                listenToAthletes();
-                sortAthletes('nombre'); 
 
-            } catch (error) {
-                console.error("Error de autorización o ID no coincide:", error);
-                alert("Acceso denegado o sesión expirada. Por favor, vuelva a iniciar sesión.");
-                
-                // Forzar cierre de sesión y redirección
-                await signOut(auth);
-                localStorage.removeItem('currentClub');
+            } else {
+                // 4. Si no hay usuario logueado en Firebase Auth, redirigir
+                console.log("Sesión no encontrada. Redirigiendo a index.html");
                 window.location.href = 'index.html'; 
             }
         });
@@ -590,7 +574,6 @@
         window.logout = async function() {
             try {
                 await signOut(auth);
-                localStorage.removeItem('currentClub'); 
                 window.location.href = 'index.html';
             } catch (error) {
                 console.error("Error al cerrar sesión:", error);
