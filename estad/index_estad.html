@@ -239,7 +239,7 @@
                 
                 const playerStats = {};
                 l.forEach(player => {
-                    playerStats[player.number] = { totalPos: 0, totalNeg: 0, efficiency: 0, actions: {} };
+                    playerStats[player.number] = { totalPos: 0, totalNeg: 0, efficiency: 0, differential: 0, totalActions: 0, actions: {} };
                 });
 
                 m_current_set.forEach(log => {
@@ -249,6 +249,7 @@
                     const actionType = log.action.charAt(0); 
 
                     if (stats) {
+                        stats.totalActions += quantity; // Suma todas las acciones (Pos o Neg)
                         if (score > 0) stats.totalPos += quantity;
                         else if (score < 0) stats.totalNeg += quantity;
 
@@ -262,23 +263,45 @@
                 l.forEach(player => {
                     const stats = playerStats[player.number];
                     const totalActions = stats.totalPos + stats.totalNeg;
-                    stats.efficiency = totalActions > 0 ? ((stats.totalPos - stats.totalNeg) / totalActions) * 100 : 0;
+                    stats.differential = stats.totalPos - stats.totalNeg; // Diferencial Pos - Neg
+                    stats.efficiency = totalActions > 0 ? (stats.differential / totalActions) * 100 : 0;
                     
                     let actionDetails = '';
                     Object.keys(o).forEach(key => {
                         const typeStats = stats.actions[key];
                         if (typeStats) {
-                            actionDetails += `<span class="text-sm font-medium mr-3">${key}: <span class="score-positive">${typeStats.pos}</span> | <span class="score-negative" style="color: ${p.neutralOrange};">${typeStats.neg}</span></span>`;
+                            actionDetails += `<span class="text-sm font-medium mr-3">${key}: <span class="score-positive">${typeStats.pos}</span> | <span class="score-neutral" style="color: ${p.neutralOrange};">${typeStats.neg}</span></span>`;
                         }
                     });
 
+                    // Determinamos el color para el diferencial neto
+                    const differentialColor = stats.differential > 0 ? p.successGreen : (stats.differential < 0 ? p.secondaryRed : p.textDark);
+
                     h.innerHTML += `
-                        <div class="stat-row-bg p-3 rounded-lg flex justify-between items-center shadow-sm">
-                            <div class="font-bold w-1/4 stat-row-text-dark">#${player.number} ${player.name}</div>
-                            <div class="w-2/4 text-xs">${actionDetails || 'Sin acciones en este Set.'}</div>
-                            <div class="w-1/4 text-right">
-                                <span class="font-bold text-lg" style="color: ${stats.efficiency >= 0 ? p.successGreen : p.secondaryRed};">
-                                    ${stats.efficiency.toFixed(1)}%
+                        <div class="stat-row-bg p-3 rounded-lg flex flex-col shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="font-bold text-lg stat-row-text-dark">#${player.number} ${player.name}</div>
+                                <div class="text-right">
+                                    <span class="font-bold text-xl" style="color: ${stats.efficiency >= 0 ? p.successGreen : p.secondaryRed};">
+                                        ${stats.efficiency.toFixed(1)}%
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between text-sm py-1 border-b border-gray-300">
+                                <span class="font-semibold stat-row-text-dark">Acciones por tipo:</span>
+                                <div class="text-xs">${actionDetails || 'Sin acciones en este Set.'}</div>
+                            </div>
+                            
+                            <div class="flex justify-between text-sm py-1 border-b border-gray-300">
+                                <span class="font-semibold stat-row-text-dark">Acciones Totales (Pos/Neg):</span>
+                                <span class="font-semibold stat-row-text-dark">${stats.totalActions}</span>
+                            </div>
+
+                            <div class="flex justify-between text-base pt-2">
+                                <span class="font-bold stat-row-text-dark">Diferencial Neto (P-N):</span>
+                                <span class="font-extrabold" style="color: ${differentialColor};">
+                                    ${stats.differential > 0 ? '+' : ''}${stats.differential}
                                 </span>
                             </div>
                         </div>
@@ -471,14 +494,14 @@
                 accumulatedBarChartInstance = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: labels, // Ahora usa los tipos de acción (Servicio, Ataque, etc.)
+                        labels: labels, 
                         datasets: [
                             {
                                 label: 'Acciones Positivas Acumuladas',
                                 data: positiveData,
                                 backgroundColor: p.primaryBlue,
-                                barPercentage: 0.8, // Barras finas
-                                categoryPercentage: 0.9 
+                                barPercentage: 0.8, 
+                                categoryPercentage: 0.9
                             },
                             {
                                 label: 'Acciones Negativas Acumuladas',
