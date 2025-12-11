@@ -1,1 +1,334 @@
-<!DOCTYPE html><html lang="es"><head><meta http-equiv="content-type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Control Voley Stats Tracker</title><script src="https://cdn.tailwindcss.com"></script><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script><style>:root{--color-main-bg:#F7F8FA;--color-card-bg:#ffffff;--color-text-dark:#1f2937;--color-primary-blue:#0056FF;--color-secondary-red:#dc2626;--color-neutral-orange:#f97316;--color-stat-row-bg:#f3f4f6}body{font-family:'Inter',sans-serif;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;background-color:var(--color-main-bg)}.card{background-color:var(--color-card-bg);color:var(--color-text-dark);border:1px solid #d1d5db;transition:transform .2s ease-in-out,box-shadow .2s ease-in-out;box-shadow:0 4px 10px -1px rgba(0,86,255,.1),0 2px 5px -2px rgba(0,86,255,.05)}.card:hover{transform:translateY(-2px);box-shadow:0 8px 15px -3px rgba(0,86,255,.2),0 4px 8px -2px rgba(0,86,255,.1)}.stat-row-bg{background-color:var(--color-stat-row-bg)}.stat-row-text-dark{color:var(--color-text-dark)}.score-positive{color:var(--color-primary-blue)}.score-negative{color:var(--color-secondary-red)}.score-neutral{color:var(--color-neutral-orange)}input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}input[type=number]{-moz-appearance:textfield}input,select{border:1px solid #d1d5db!important;background-color:var(--color-card-bg)!important;color:var(--color-text-dark)!important}input:focus,select:focus{box-shadow:0 0 0 2px var(--color-card-bg),0 0 0 4px var(--color-primary-blue)}#actionSelect{color:var(--color-text-dark)!important}footer{padding:1.5rem 0;text-align:center;width:100%;max-width:5xl;margin-top:2rem;border-top:1px solid #e5e7eb;font-size:.875rem;color:#6b7280}footer strong{color:var(--color-text-dark);font-weight:500}</style></head><body class="text-gray-800 min-h-screen flex flex-col items-center p-4"><main class="w-full max-w-5xl mx-auto space-y-8 shadow-sm"><header class="text-center relative"><a href="../index_menu.html" class="absolute top-0 right-0 font-bold py-2 px-4 rounded-md transition-colors text-sm shadow-md" style="background-color: var(--color-primary-blue); color: white;" onmouseover="this.style.backgroundColor='#007bff';" onmouseout="this.style.backgroundColor='var(--color-primary-blue)';" aria-label="Regresar al Menú">Regresar al Menú</a><h1 class="text-4xl font-extrabold tracking-tight stat-row-text-dark sm:text-5xl">Control Voley <span class="text-yellow-600">Stats Tracker</span></h1><p class="mt-4 text-lg text-gray-500 font-medium">Monitorea el rendimiento y la eficiencia de tus atletas en tiempo real.</p></header><div class="grid grid-cols-1 gap-8"><div class="space-y-6"><div class="card p-6 rounded-lg"><h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Registrar Atleta</h2><div class="flex flex-col sm:flex-row gap-4"><input id="playerNumberInput" placeholder="Nro." class="w-full sm:w-24 rounded-md px-3 py-2 focus:outline-none" type="number" style="--tw-ring-color: var(--color-primary-blue);"><input id="playerNameInput" placeholder="Nombre del Atleta" class="flex-grow rounded-md px-3 py-2 focus:outline-none" type="text" style="--tw-ring-color: var(--color-primary-blue);"><button id="addPlayerBtn" class="text-white font-bold py-2 px-4 rounded-md transition-colors shadow-lg" style="background-color: var(--color-primary-blue);" onmouseover="this.style.backgroundColor='#007bff';" onmouseout="this.style.backgroundColor='var(--color-primary-blue)';">Agregar</button></div></div><div class="card p-6 rounded-lg"><h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Registrar Acción</h2><form id="actionForm" class="space-y-4"><div><label for="playerSelect" class="block mb-2 text-sm font-medium stat-row-text-dark">Seleccionar Atleta</label><select id="playerSelect" class="w-full rounded-md px-3 py-2 focus:outline-none" style="--tw-ring-color: var(--color-primary-blue);"><option disabled="disabled" selected="selected">Agregar atleta primero</option></select></div><div><label for="actionSelect" class="block mb-2 text-sm font-medium stat-row-text-dark">Tipo de Acción</label><select id="actionSelect" class="w-full rounded-md px-3 py-2 focus:outline-none" style="--tw-ring-color: var(--color-primary-blue);"></select></div><div class="hidden"><label for="quantityInput" class="block mb-2 text-sm font-medium stat-row-text-dark">Cantidad</label><input id="quantityInput" value="1" min="1" class="w-full rounded-md px-3 py-2 focus:outline-none" type="number" style="--tw-ring-color: var(--color-primary-blue);"></div><button type="submit" class="w-full text-white font-bold py-2 px-4 rounded-md transition-colors shadow-lg" style="background-color: var(--color-primary-blue);" onmouseover="this.style.backgroundColor='#007bff';" onmouseout="this.style.backgroundColor='var(--color-primary-blue)';">Registrar</button><button type="button" id="clearSetDataBtn" class="w-full text-white font-bold py-2 px-4 rounded-md transition-colors mt-4 shadow-md" style="background-color: #d97706;" onmouseover="this.style.backgroundColor='#b45309';" onmouseout="this.style.backgroundColor='#d97706';">Eliminar Datos del Set</button><button type="button" id="clearGameDataBtn" class="w-full text-white font-bold py-2 px-4 rounded-md transition-colors mt-4 shadow-md" style="background-color: var(--color-secondary-red);" onmouseover="this.style.backgroundColor='#ef4444';" onmouseout="this.style.backgroundColor='var(--color-secondary-red)';">Eliminar Datos del Juego</button></form></div></div><div class="card p-6 rounded-lg"><h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Estadística por Atleta</h2><div id="scoresContainer" class="space-y-3"><p class="stat-row-text-dark text-center py-8">Aún no hay atletas. ¡Agrégalos para empezar!</p></div></div><div class="card p-6 rounded-lg mt-8"><h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Estadística General por Equipo</h2><div id="generalStatsContainer" class="space-y-3"><p class="stat-row-text-dark text-center py-8">Registra acciones para ver el resumen.</p></div></div><div class="card p-6 rounded-lg mt-8"><h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Gráfica General del Equipo (Positivos vs Negativos)</h2><div class="h-96"><canvas id="barChart"></canvas></div></div></div></main><footer class="mt-8 text-sm w-full max-w-5xl"><p>Copyright © Empresa Sistematikos. Todos los derechos reservados.</p><p>Diseñado por <strong>Sistematikos - Frank Hernandez</strong></p></footer><script>let barChartInstance=null;document.addEventListener('DOMContentLoaded',()=>{const a=document.getElementById('playerNumberInput'),b=document.getElementById('playerNameInput'),c=document.getElementById('addPlayerBtn'),d=document.getElementById('playerSelect'),e=document.getElementById('actionSelect'),f=document.getElementById('quantityInput'),g=document.getElementById('actionForm'),h=document.getElementById('scoresContainer'),i=document.getElementById('generalStatsContainer'),j=document.getElementById('clearSetDataBtn'),k=document.getElementById('clearGameDataBtn');let l=[],m=[];const n={'S# Servicio Positivo':1,'A# Ataque Positivo':1,'B# Bloqueo Positivo':1,'R# Recepción Positiva':1,'C# Coloque Positivo':1,'D# Defensa Positiva':1,'S= Servicio Negativo':-1,'A= Ataque Negativo':-1,'B= Bloqueo Negativo':-1,'R= Recepción Negativo':-1,'C= Coloque Negativo':-1,'D= Defensa Negativa':-1},o={S:'Servicio',A:'Ataque',B:'Bloqueo',R:'Recepción',C:'Coloque',D:'Defensa'},p={primaryBlue:'#0056FF',secondaryRed:'#dc2626',textDark:'#1f2937'};function q(){localStorage.setItem('volleyballPlayers',JSON.stringify(l));localStorage.setItem('volleyballActionLog',JSON.stringify(m))}function r(){const a=localStorage.getItem('volleyballPlayers');a&&(l=JSON.parse(a));const b=localStorage.getItem('volleyballActionLog');b&&(m=JSON.parse(b))}r();function s(){const a=e.options[e.selectedIndex],b=a?a.value:null,c=b?n[b]:0;c>0?e.style.
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Voley Stats Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <style>
+        :root{
+            --color-main-bg:#F7F8FA;
+            --color-card-bg:#ffffff;
+            --color-text-dark:#1f2937;
+            --color-primary-blue:#0056FF;
+            --color-secondary-red:#dc2626;
+            --color-neutral-orange:#f97316;
+            --color-stat-row-bg:#f3f4f6
+        }
+        body{
+            font-family:'Inter',sans-serif;
+            user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;
+            background-color:var(--color-main-bg)
+        }
+        .card{
+            background-color:var(--color-card-bg);
+            color:var(--color-text-dark);
+            border:1px solid #d1d5db;
+            transition:transform .2s ease-in-out,box-shadow .2s ease-in-out;
+            box-shadow:0 4px 10px -1px rgba(0,86,255,.1),0 2px 5px -2px rgba(0,86,255,.05)
+        }
+        .card:hover{
+            transform:translateY(-2px);
+            box-shadow:0 8px 15px -3px rgba(0,86,255,.2),0 4px 8px -2px rgba(0,86,255,.1)
+        }
+        .stat-row-bg{background-color:var(--color-stat-row-bg)}
+        .stat-row-text-dark{color:var(--color-text-dark)}
+        .score-positive{color:var(--color-primary-blue)}
+        .score-negative{color:var(--color-secondary-red)}
+        .score-neutral{color:var(--color-neutral-orange)}
+        input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+        input[type=number]{-moz-appearance:textfield}
+        input,select{border:1px solid #d1d5db!important;background-color:var(--color-card-bg)!important;color:var(--color-text-dark)!important}
+        input:focus,select:focus{box-shadow:0 0 0 2px var(--color-card-bg),0 0 0 4px var(--color-primary-blue)}
+        #actionSelect{color:var(--color-text-dark)!important}
+        footer{padding:1.5rem 0;text-align:center;width:100%;max-width:5xl;margin-top:2rem;border-top:1px solid #e5e7eb;font-size:.875rem;color:#6b7280}
+        footer strong{color:var(--color-text-dark);font-weight:500}
+    </style>
+</head>
+
+<body class="text-gray-800 min-h-screen flex flex-col items-center p-4">
+    <main class="w-full max-w-5xl mx-auto space-y-8 shadow-sm">
+        <header class="text-center relative">
+            <a href="../index_menu.html" class="absolute top-0 right-0 font-bold py-2 px-4 rounded-md transition-colors text-sm shadow-md" style="background-color: var(--color-primary-blue); color: white;" onmouseover="this.style.backgroundColor='#007bff';" onmouseout="this.style.backgroundColor='var(--color-primary-blue)';" aria-label="Regresar al Menú">Regresar al Menú</a>
+            <h1 class="text-4xl font-extrabold tracking-tight stat-row-text-dark sm:text-5xl">Control Voley <span class="text-yellow-600">Stats Tracker</span></h1>
+            <p class="mt-4 text-lg text-gray-500 font-medium">Monitorea el rendimiento y la eficiencia de tus atletas en tiempo real.</p>
+        </header>
+
+        <div class="grid grid-cols-1 gap-8">
+            <div class="space-y-6">
+                <div class="card p-6 rounded-lg">
+                    <h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Registrar Atleta</h2>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <input id="playerNumberInput" placeholder="Nro." class="w-full sm:w-24 rounded-md px-3 py-2 focus:outline-none" type="number" style="--tw-ring-color: var(--color-primary-blue);">
+                        <input id="playerNameInput" placeholder="Nombre del Atleta" class="flex-grow rounded-md px-3 py-2 focus:outline-none" type="text" style="--tw-ring-color: var(--color-primary-blue);">
+                        <button id="addPlayerBtn" class="text-white font-bold py-2 px-4 rounded-md transition-colors shadow-lg" style="background-color: var(--color-primary-blue);" onmouseover="this.style.backgroundColor='#007bff';" onmouseout="this.style.backgroundColor='var(--color-primary-blue)';">Agregar</button>
+                    </div>
+                </div>
+
+                <div class="card p-6 rounded-lg">
+                    <h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Registrar Acción</h2>
+                    <form id="actionForm" class="space-y-4">
+                        <div>
+                            <label for="playerSelect" class="block mb-2 text-sm font-medium stat-row-text-dark">Seleccionar Atleta</label>
+                            <select id="playerSelect" class="w-full rounded-md px-3 py-2 focus:outline-none" style="--tw-ring-color: var(--color-primary-blue);">
+                                <option disabled="disabled" selected="selected">Agregar atleta primero</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="actionSelect" class="block mb-2 text-sm font-medium stat-row-text-dark">Tipo de Acción</label>
+                            <select id="actionSelect" class="w-full rounded-md px-3 py-2 focus:outline-none" style="--tw-ring-color: var(--color-primary-blue);"></select>
+                        </div>
+                        <div class="hidden">
+                            <label for="quantityInput" class="block mb-2 text-sm font-medium stat-row-text-dark">Cantidad</label>
+                            <input id="quantityInput" value="1" min="1" class="w-full rounded-md px-3 py-2 focus:outline-none" type="number" style="--tw-ring-color: var(--color-primary-blue);">
+                        </div>
+                        <button type="submit" class="w-full text-white font-bold py-2 px-4 rounded-md transition-colors shadow-lg" style="background-color: var(--color-primary-blue);" onmouseover="this.style.backgroundColor='#007bff';" onmouseout="this.style.backgroundColor='var(--color-primary-blue)';">Registrar</button>
+                        <button type="button" id="clearSetDataBtn" class="w-full text-white font-bold py-2 px-4 rounded-md transition-colors mt-4 shadow-md" style="background-color: #d97706;" onmouseover="this.style.backgroundColor='#b45309';" onmouseout="this.style.backgroundColor='#d97706';">Eliminar Datos del Set</button>
+                        <button type="button" id="clearGameDataBtn" class="w-full text-white font-bold py-2 px-4 rounded-md transition-colors mt-4 shadow-md" style="background-color: var(--color-secondary-red);" onmouseover="this.style.backgroundColor='#ef4444';" onmouseout="this.style.backgroundColor='var(--color-secondary-red)';">Eliminar Datos del Juego</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card p-6 rounded-lg">
+                <h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Estadística por Atleta</h2>
+                <div id="scoresContainer" class="space-y-3">
+                    <p class="stat-row-text-dark text-center py-8">Aún no hay atletas. ¡Agrégalos para empezar!</p>
+                </div>
+            </div>
+
+            <div class="card p-6 rounded-lg mt-8">
+                <h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Estadística General por Equipo</h2>
+                <div id="generalStatsContainer" class="space-y-3">
+                    <p class="stat-row-text-dark text-center py-8">Registra acciones para ver el resumen.</p>
+                </div>
+            </div>
+
+            <div class="card p-6 rounded-lg mt-8">
+                <h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Gráfica General del Equipo (Positivos vs Negativos)</h2>
+                <div class="h-96">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card p-6 rounded-lg mt-8">
+                <h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Gráficas Generales del Juego (Puntos Totales)</h2>
+                <div class="h-96 flex justify-center items-center">
+                    <canvas id="doughnutChart" class="max-h-80"></canvas>
+                </div>
+                <div id="totalPointsSummary" class="text-center mt-4 text-lg font-semibold stat-row-text-dark">
+                    </div>
+            </div>
+            </div>
+    </main>
+
+    <footer class="mt-8 text-sm w-full max-w-5xl">
+        <p>Copyright © Empresa Sistematikos. Todos los derechos reservados.</p>
+        <p>Diseñado por <strong>Sistematikos - Frank Hernandez</strong></p>
+    </footer>
+
+    <script>
+        let barChartInstance = null;
+        let doughnutChartInstance = null; // Nuevo: Instancia para la gráfica de dona
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const a = document.getElementById('playerNumberInput'),
+                b = document.getElementById('playerNameInput'),
+                c = document.getElementById('addPlayerBtn'),
+                d = document.getElementById('playerSelect'),
+                e = document.getElementById('actionSelect'),
+                f = document.getElementById('quantityInput'),
+                g = document.getElementById('actionForm'),
+                h = document.getElementById('scoresContainer'),
+                i = document.getElementById('generalStatsContainer'),
+                j = document.getElementById('clearSetDataBtn'),
+                k = document.getElementById('clearGameDataBtn');
+            
+            let l = [], // l: players
+                m = []; // m: actionLog
+
+            const n = { // n: scoreMap
+                'S# Servicio Positivo': 1,
+                'A# Ataque Positivo': 1,
+                'B# Bloqueo Positivo': 1,
+                'R# Recepción Positiva': 1,
+                'C# Coloque Positivo': 1,
+                'D# Defensa Positiva': 1,
+                'S= Servicio Negativo': -1,
+                'A= Ataque Negativo': -1,
+                'B= Bloqueo Negativo': -1,
+                'R= Recepción Negativo': -1,
+                'C= Coloque Negativo': -1,
+                'D= Defensa Negativa': -1
+            },
+            o = { // o: actionTypes
+                S: 'Servicio',
+                A: 'Ataque',
+                B: 'Bloqueo',
+                R: 'Recepción',
+                C: 'Coloque',
+                D: 'Defensa'
+            },
+            p = { // p: colorMap
+                primaryBlue: '#0056FF',
+                secondaryRed: '#dc2626',
+                textDark: '#1f2937'
+            };
+
+            // Funciones de LocalStorage
+            function q() {
+                localStorage.setItem('volleyballPlayers', JSON.stringify(l));
+                localStorage.setItem('volleyballActionLog', JSON.stringify(m));
+            }
+            
+            function r() {
+                const a = localStorage.getItem('volleyballPlayers');
+                a && (l = JSON.parse(a));
+                const b = localStorage.getItem('volleyballActionLog');
+                b && (m = JSON.parse(b));
+            }
+            
+            r();
+
+            // Función para obtener el valor de la acción seleccionada (puntuación)
+            function s() {
+                const a = e.options[e.selectedIndex],
+                    b = a ? a.value : null,
+                    c = b ? n[b] : 0;
+                c > 0 ? e.style.borderColor = p.primaryBlue : c < 0 ? e.style.borderColor = p.secondaryRed : e.style.borderColor = '#d1d5db';
+                return c;
+            }
+
+            // Resto del código...
+
+            // Función para inicializar o actualizar la nueva gráfica de dona
+            function updateDoughnutChart() {
+                let totalPositive = 0;
+                let totalNegative = 0;
+
+                // 1. Calcular totales desde el log (m)
+                m.forEach(log => {
+                    const score = n[log.action]; // Obtiene el valor (1 o -1) de la acción
+                    const quantity = log.quantity || 1;
+                    if (score > 0) {
+                        totalPositive += quantity;
+                    } else if (score < 0) {
+                        totalNegative += quantity;
+                    }
+                });
+
+                const totalActions = totalPositive + totalNegative;
+                const ctx = document.getElementById('doughnutChart').getContext('2d');
+                const summaryDiv = document.getElementById('totalPointsSummary');
+
+                // Mostrar resumen de texto
+                if (totalActions === 0) {
+                    summaryDiv.innerHTML = 'No se han registrado acciones aún para las gráficas generales.';
+                    if (doughnutChartInstance) {
+                        doughnutChartInstance.destroy();
+                        doughnutChartInstance = null;
+                    }
+                    // Ocultar canvas si está vacío
+                    document.getElementById('doughnutChart').style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('doughnutChart').style.display = 'block';
+
+                summaryDiv.innerHTML = `
+                    <p class="score-positive">Puntos Positivos: ${totalPositive}</p>
+                    <p class="score-negative">Puntos Negativos: ${totalNegative}</p>
+                    <p class="stat-row-text-dark">Total de Acciones con Valor: ${totalActions}</p>
+                `;
+
+                // 2. Destruir instancia anterior
+                if (doughnutChartInstance) {
+                    doughnutChartInstance.destroy();
+                }
+
+                // 3. Crear nueva instancia (Doughnut Chart)
+                doughnutChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Puntos Positivos', 'Puntos Negativos'],
+                        datasets: [{
+                            data: [totalPositive, totalNegative],
+                            backgroundColor: [
+                                p.primaryBlue, // Azul
+                                p.secondaryRed // Rojo
+                            ],
+                            hoverOffset: 8,
+                            borderWidth: 2,
+                            borderColor: p.cardBg // Blanco para borde
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%', // Grosor del anillo
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: p.textDark,
+                                    font: {
+                                        size: 14,
+                                        family: 'Inter'
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Proporción de Rendimiento Global',
+                                color: p.textDark,
+                                font: {
+                                    size: 16,
+                                    family: 'Inter',
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Aquí se llama la función updateDoughnutChart dentro de la función de inicialización principal
+            updateDoughnutChart();
+
+
+            // --- Se reemplaza esta sección de tu JS con los cambios necesarios ---
+            
+            // Lógica para el botón "Eliminar Datos del Juego" (k)
+            k.addEventListener('click', () => {
+                if (confirm('¿Estás seguro de que deseas ELIMINAR TODOS los datos del JUEGO (log de acciones y jugadores)? Esta acción es irreversible.')) {
+                    l = []; // Borrar jugadores
+                    m = []; // Borrar log
+                    q(); // Guardar en localStorage
+                    // Recargar toda la interfaz
+                    window.location.reload(); 
+                }
+            });
+
+            // Lógica para el botón "Eliminar Datos del Set" (j)
+            j.addEventListener('click', () => {
+                if (confirm('¿Estás seguro de que deseas ELIMINAR los datos del SET? (Solo se borran las acciones registradas, los jugadores se mantienen)')) {
+                    m = []; // Borrar log de acciones del set
+                    q(); // Guardar en localStorage
+                    // Recargar las estadísticas, mantener jugadores
+                    // Se asume que tienes una función t() que actualiza todas las stats
+                    // Si no existe t(), se puede usar window.location.reload()
+                    alert('Datos del set eliminados. Actualiza el resto de las estadísticas (funciones no proporcionadas en el fragmento).');
+                    // Actualizar solo las gráficas que dependen del log (m)
+                    // ... llamar a las funciones de actualización de stats (t(), updateBarChart(), etc.)
+                    updateDoughnutChart(); // Actualizar la gráfica de totales
+                }
+            });
+
+            // ... (Añadir el resto de tu código JS aquí, incluyendo la lógica de registro de acción que debe llamar a updateDoughnutChart() al registrar un nuevo evento) ...
+
+            // --- FIN de la sección reemplazada ---
+        });
+    </script>
+</body>
+</html>
