@@ -111,7 +111,7 @@
                     <canvas id="barChart"></canvas>
                 </div>
             </div>
-
+            
             <div class="card p-6 rounded-lg mt-8">
                 <h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Gráficas Generales del Juego (Puntos Totales)</h2>
                 <div class="h-96 flex justify-center items-center">
@@ -130,7 +130,7 @@
 
     <script>
         let barChartInstance = null;
-        let doughnutChartInstance = null; // Nuevo: Instancia para la gráfica de dona
+        let doughnutChartInstance = null; // Instancia para la gráfica de dona
 
         document.addEventListener('DOMContentLoaded', () => {
             const a = document.getElementById('playerNumberInput'),
@@ -173,25 +173,29 @@
             p = { // p: colorMap
                 primaryBlue: '#0056FF',
                 secondaryRed: '#dc2626',
-                textDark: '#1f2937'
+                textDark: '#1f2937',
+                cardBg: '#ffffff'
             };
 
-            // Funciones de LocalStorage
+            // ----------------------------------------------------------------------
+            // FUNCIONES PRINCIPALES
+            // ----------------------------------------------------------------------
+
+            // Guarda datos en localStorage
             function q() {
                 localStorage.setItem('volleyballPlayers', JSON.stringify(l));
                 localStorage.setItem('volleyballActionLog', JSON.stringify(m));
             }
             
+            // Carga datos desde localStorage
             function r() {
                 const a = localStorage.getItem('volleyballPlayers');
                 a && (l = JSON.parse(a));
                 const b = localStorage.getItem('volleyballActionLog');
                 b && (m = JSON.parse(b));
             }
-            
-            r();
 
-            // Función para obtener el valor de la acción seleccionada (puntuación)
+            // Actualiza el estilo del select de acción
             function s() {
                 const a = e.options[e.selectedIndex],
                     b = a ? a.value : null,
@@ -200,16 +204,48 @@
                 return c;
             }
 
-            // Resto del código...
+            // [LÓGICA FALTANTE] Llena el select de atletas (d)
+            function populatePlayerSelect() {
+                d.innerHTML = '';
+                if (l.length === 0) {
+                    d.innerHTML = '<option disabled selected>Agregar atleta primero</option>';
+                    return;
+                }
+                l.sort((p1, p2) => p1.number - p2.number); // Ordenar por número
+                l.forEach(player => {
+                    const option = document.createElement('option');
+                    option.value = player.number;
+                    option.textContent = `#${player.number} - ${player.name}`;
+                    d.appendChild(option);
+                });
+            }
 
-            // Función para inicializar o actualizar la nueva gráfica de dona
+            // [LÓGICA FALTANTE] Llena el select de acciones (e)
+            function populateActionSelect() {
+                e.innerHTML = '';
+                Object.keys(n).forEach(action => {
+                    const option = document.createElement('option');
+                    option.value = action;
+                    option.textContent = action;
+                    e.appendChild(option);
+                });
+                s(); // Establecer color inicial
+            }
+
+            // [LÓGICA FALTANTE] Actualiza todas las estadísticas y gráficas
+            function updateAllStats() {
+                // Aquí irían las llamadas a updateScoreContainer(), updateGeneralStats(), updateBarChart()
+                // Por ahora, solo llamamos a la que sí creamos:
+                updateDoughnutChart();
+            }
+
+            // [NUEVA FUNCIÓN] Inicializar o actualizar la gráfica de dona (Puntos Totales)
             function updateDoughnutChart() {
                 let totalPositive = 0;
                 let totalNegative = 0;
 
-                // 1. Calcular totales desde el log (m)
                 m.forEach(log => {
-                    const score = n[log.action]; // Obtiene el valor (1 o -1) de la acción
+                    const score = n[log.action]; 
                     const quantity = log.quantity || 1;
                     if (score > 0) {
                         totalPositive += quantity;
@@ -222,14 +258,12 @@
                 const ctx = document.getElementById('doughnutChart').getContext('2d');
                 const summaryDiv = document.getElementById('totalPointsSummary');
 
-                // Mostrar resumen de texto
                 if (totalActions === 0) {
                     summaryDiv.innerHTML = 'No se han registrado acciones aún para las gráficas generales.';
                     if (doughnutChartInstance) {
                         doughnutChartInstance.destroy();
                         doughnutChartInstance = null;
                     }
-                    // Ocultar canvas si está vacío
                     document.getElementById('doughnutChart').style.display = 'none';
                     return;
                 }
@@ -242,12 +276,10 @@
                     <p class="stat-row-text-dark">Total de Acciones con Valor: ${totalActions}</p>
                 `;
 
-                // 2. Destruir instancia anterior
                 if (doughnutChartInstance) {
                     doughnutChartInstance.destroy();
                 }
 
-                // 3. Crear nueva instancia (Doughnut Chart)
                 doughnutChartInstance = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
@@ -255,79 +287,135 @@
                         datasets: [{
                             data: [totalPositive, totalNegative],
                             backgroundColor: [
-                                p.primaryBlue, // Azul
-                                p.secondaryRed // Rojo
+                                p.primaryBlue,
+                                p.secondaryRed
                             ],
                             hoverOffset: 8,
                             borderWidth: 2,
-                            borderColor: p.cardBg // Blanco para borde
+                            borderColor: p.cardBg
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        cutout: '70%', // Grosor del anillo
+                        cutout: '70%',
                         plugins: {
                             legend: {
                                 position: 'bottom',
                                 labels: {
                                     color: p.textDark,
-                                    font: {
-                                        size: 14,
-                                        family: 'Inter'
-                                    }
+                                    font: { size: 14, family: 'Inter' }
                                 }
                             },
                             title: {
                                 display: true,
                                 text: 'Proporción de Rendimiento Global',
                                 color: p.textDark,
-                                font: {
-                                    size: 16,
-                                    family: 'Inter',
-                                    weight: 'bold'
-                                }
+                                font: { size: 16, family: 'Inter', weight: 'bold' }
                             }
                         }
                     }
                 });
             }
-
-            // Aquí se llama la función updateDoughnutChart dentro de la función de inicialización principal
-            updateDoughnutChart();
-
-
-            // --- Se reemplaza esta sección de tu JS con los cambios necesarios ---
             
-            // Lógica para el botón "Eliminar Datos del Juego" (k)
+            // ----------------------------------------------------------------------
+            // MANEJADORES DE EVENTOS
+            // ----------------------------------------------------------------------
+
+            // [LÓGICA FALTANTE] Manejador para agregar atleta (c)
+            c.addEventListener('click', () => {
+                const number = parseInt(a.value.trim());
+                const name = b.value.trim();
+
+                if (isNaN(number) || number <= 0) {
+                    alert('Por favor, ingresa un número de atleta válido.');
+                    a.focus();
+                    return;
+                }
+                if (name === '') {
+                    alert('Por favor, ingresa el nombre del atleta.');
+                    b.focus();
+                    return;
+                }
+
+                // Verificar si el número ya existe
+                if (l.some(player => player.number === number)) {
+                    alert(`El número ${number} ya está asignado a un atleta.`);
+                    a.focus();
+                    return;
+                }
+
+                l.push({ number: number, name: name });
+                q(); // Guardar
+                populatePlayerSelect(); // Actualizar el select
+                updateAllStats(); // Actualizar estadísticas (incluyendo la gráfica de dona)
+                
+                // Limpiar inputs
+                a.value = '';
+                b.value = '';
+
+                alert(`Atleta #${number} (${name}) agregado con éxito.`);
+            });
+
+            // Manejador para cambiar el color del select de acción al seleccionar
+            e.addEventListener('change', s);
+
+            // Manejador para el botón "Eliminar Datos del Juego" (k)
             k.addEventListener('click', () => {
                 if (confirm('¿Estás seguro de que deseas ELIMINAR TODOS los datos del JUEGO (log de acciones y jugadores)? Esta acción es irreversible.')) {
-                    l = []; // Borrar jugadores
-                    m = []; // Borrar log
-                    q(); // Guardar en localStorage
-                    // Recargar toda la interfaz
+                    l = []; 
+                    m = []; 
+                    q(); 
                     window.location.reload(); 
                 }
             });
 
-            // Lógica para el botón "Eliminar Datos del Set" (j)
+            // Manejador para el botón "Eliminar Datos del Set" (j)
             j.addEventListener('click', () => {
                 if (confirm('¿Estás seguro de que deseas ELIMINAR los datos del SET? (Solo se borran las acciones registradas, los jugadores se mantienen)')) {
-                    m = []; // Borrar log de acciones del set
-                    q(); // Guardar en localStorage
-                    // Recargar las estadísticas, mantener jugadores
-                    // Se asume que tienes una función t() que actualiza todas las stats
-                    // Si no existe t(), se puede usar window.location.reload()
-                    alert('Datos del set eliminados. Actualiza el resto de las estadísticas (funciones no proporcionadas en el fragmento).');
-                    // Actualizar solo las gráficas que dependen del log (m)
-                    // ... llamar a las funciones de actualización de stats (t(), updateBarChart(), etc.)
-                    updateDoughnutChart(); // Actualizar la gráfica de totales
+                    m = [];
+                    q(); 
+                    alert('Datos del set eliminados.');
+                    updateAllStats(); // Llama a la actualización de stats/gráficas
                 }
             });
 
-            // ... (Añadir el resto de tu código JS aquí, incluyendo la lógica de registro de acción que debe llamar a updateDoughnutChart() al registrar un nuevo evento) ...
+            // [LÓGICA FALTANTE] Manejador para registrar acción (g)
+            g.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const playerNumber = parseInt(d.value);
+                const action = e.value;
+                const quantity = parseInt(f.value) || 1;
 
-            // --- FIN de la sección reemplazada ---
+                if (!playerNumber) {
+                    alert('Por favor, selecciona un atleta.');
+                    return;
+                }
+
+                // Registro de la acción
+                m.push({
+                    playerNumber: playerNumber,
+                    action: action,
+                    quantity: quantity,
+                    timestamp: new Date().toISOString()
+                });
+
+                q(); // Guardar
+                updateAllStats(); // Actualizar todas las estadísticas y gráficas
+
+                alert(`Acción registrada: #${playerNumber} - ${action} (x${quantity})`);
+            });
+
+
+            // ----------------------------------------------------------------------
+            // INICIALIZACIÓN
+            // ----------------------------------------------------------------------
+            
+            r(); // Cargar datos
+            populateActionSelect(); // Inicializar el select de acciones
+            populatePlayerSelect(); // Inicializar el select de atletas (CORREGIDO)
+            updateAllStats(); // Inicializar todas las stats y gráficas (CORREGIDO)
+
         });
     </script>
 </body>
