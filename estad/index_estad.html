@@ -43,7 +43,7 @@
         input,select{border:1px solid #d1d5db!important;background-color:var(--color-card-bg)!important;color:var(--color-text-dark)!important}
         input:focus,select:focus{box-shadow:0 0 0 2px var(--color-card-bg),0 0 0 4px var(--color-primary-blue)}
         #actionSelect{color:var(--color-text-dark)!important}
-        footer{padding:1.5rem 0;text-align:center;width:100%;max-width:5xl;margin-top:2rem;border-top:1px solid #e5e7eb;font-size:.875rem;color:#6b7280}
+        footer{padding:1.5rem 0;text-align:center;width:100%;max-w-5xl;margin-top:2rem;border-top:1px solid #e5e7eb;font-size:.875rem;color:#6b7280}
         footer strong{color:var(--color-text-dark);font-weight:500}
     </style>
 </head>
@@ -222,10 +222,10 @@
             }
             
             // ----------------------------------------------------------------------
-            // FUNCIONES DE ESTADÍSTICA (NUEVAS O COMPLETADAS)
+            // FUNCIONES DE ESTADÍSTICA
             // ----------------------------------------------------------------------
             
-            // 1. Estadísticas por Atleta (h)
+            // 1. Estadísticas por Atleta (h) - Usa m_current_set
             function updateScoreContainer() {
                 h.innerHTML = ''; // Limpiar contenedor
                 if (l.length === 0) {
@@ -284,7 +284,7 @@
                 });
             }
 
-            // 2. Estadística General por Equipo (i)
+            // 2. Estadística General por Equipo (i) - Usa m_current_set
             function updateGeneralStats() {
                 i.innerHTML = '';
                 if (m_current_set.length === 0) {
@@ -342,9 +342,8 @@
                 i.innerHTML = statsHtml;
             }
 
-            // 3. Gráfica de Barras (barChart) - Log del Set Actual (m_current_set)
+            // 3. Gráfica de Barras (barChart) - Usa m_current_set (Barras Agrupadas)
             function updateBarChart() {
-                // Cálculo de Positivos/Negativos por tipo de acción (igual que en updateGeneralStats)
                 const actionTotals = {};
                 Object.keys(o).forEach(key => actionTotals[key] = { pos: 0, neg: 0 });
 
@@ -387,20 +386,25 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: {
-                            x: { stacked: true },
-                            y: { stacked: true, beginAtZero: true }
+                            x: { 
+                                stacked: false // Agrupadas
+                            },
+                            y: { 
+                                stacked: false, // Agrupadas
+                                beginAtZero: true 
+                            }
                         }
                     }
                 });
             }
 
 
-            // 4. Gráfica de Dona (doughnutChart) - Log del Juego Completo (m)
+            // 4. Gráfica de Dona (doughnutChart) - Usa m (Log de Juego Acumulado)
             function updateDoughnutChart() {
                 let totalPositive = 0;
                 let totalNegative = 0;
 
-                // **USA EL LOG ACUMULADO (m)**
+                // USA EL LOG ACUMULADO (m)
                 m.forEach(log => {
                     const score = n[log.action]; 
                     const quantity = log.quantity || 1;
@@ -488,7 +492,7 @@
             // MANEJADORES DE EVENTOS
             // ----------------------------------------------------------------------
 
-            // Manejador para agregar atleta (c)
+            // Manejador para agregar atleta
             c.addEventListener('click', () => {
                 const number = parseInt(a.value.trim());
                 const name = b.value.trim();
@@ -516,7 +520,7 @@
             // Manejador para cambiar el color del select de acción al seleccionar
             e.addEventListener('change', s);
 
-            // Manejador para registrar acción (g)
+            // Manejador para registrar acción
             g.addEventListener('submit', (event) => {
                 event.preventDefault();
                 const playerNumber = parseInt(d.value);
@@ -546,17 +550,17 @@
             });
 
 
-            // Manejador para el botón "Eliminar Datos del Set" (j)
+            // Manejador para el botón "Eliminar Datos del Set" (SOLO BORRA M_CURRENT_SET)
             j.addEventListener('click', () => {
                 if (confirm('¿Estás seguro de que deseas ELIMINAR los datos del SET? (Solo se borran las acciones del set actual, el acumulado del juego se mantiene)')) {
                     m_current_set = []; // Borrar solo el log del set actual
                     q(); 
                     alert('Datos del set eliminados. El acumulado del juego se ha conservado.');
-                    updateAllStats(); // Llama a la actualización de stats/gráficas (la de dona no se afecta)
+                    updateAllStats(); 
                 }
             });
 
-            // Manejador para el botón "Eliminar Datos del Juego" (k)
+            // Manejador para el botón "Eliminar Datos del Juego" (BORRA TODO)
             k.addEventListener('click', () => {
                 if (confirm('¿Estás seguro de que deseas ELIMINAR TODOS los datos del JUEGO (log de acciones y jugadores)? Esta acción es irreversible.')) {
                     l = []; // Borrar jugadores
