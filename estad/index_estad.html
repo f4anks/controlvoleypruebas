@@ -14,7 +14,7 @@
             --color-text-dark:#1f2937;
             --color-primary-blue:#0056FF;
             --color-secondary-red:#dc2626;
-            --color-neutral-orange:#f97316;
+            --color-neutral-orange:#f97316; /* Color para negativo */
             --color-stat-row-bg:#f3f4f6
         }
         body{
@@ -130,7 +130,6 @@
 
     <script>
         let barChartInstance = null;
-        // Cambiamos el nombre de la variable de instancia
         let accumulatedBarChartInstance = null; 
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -160,8 +159,12 @@
                 S: 'Servicio', A: 'Ataque', B: 'Bloqueo', R: 'Recepción', C: 'Coloque', D: 'Defensa'
             },
             p = { // p: colorMap
-                primaryBlue: '#0056FF', secondaryRed: '#dc2626', textDark: '#1f2937', cardBg: '#ffffff',
-                neutralOrange: '#f97316', successGreen: '#10b981'
+                primaryBlue: '#0056FF', 
+                secondaryRed: '#dc2626', 
+                textDark: '#1f2937', 
+                cardBg: '#ffffff',
+                neutralOrange: '#f97316', // Usaremos este color para negativos
+                successGreen: '#10b981'
             };
 
             // ----------------------------------------------------------------------
@@ -265,7 +268,7 @@
                     Object.keys(o).forEach(key => {
                         const typeStats = stats.actions[key];
                         if (typeStats) {
-                            actionDetails += `<span class="text-sm font-medium mr-3">${key}: <span class="score-positive">${typeStats.pos}</span> | <span class="score-negative">${typeStats.neg}</span></span>`;
+                            actionDetails += `<span class="text-sm font-medium mr-3">${key}: <span class="score-positive">${typeStats.pos}</span> | <span class="score-negative" style="color: ${p.neutralOrange};">${typeStats.neg}</span></span>`;
                         }
                     });
 
@@ -330,7 +333,7 @@
                         statsHtml += `
                             <div class="p-3 border-b border-gray-200 flex justify-between stat-row-text-dark">
                                 <span>${o[key]} (${typeTotal} acciones):</span>
-                                <span><span class="score-positive">${stats.pos}</span> | <span class="score-negative">${stats.neg}</span> | 
+                                <span><span class="score-positive">${stats.pos}</span> | <span class="score-neutral" style="color: ${p.neutralOrange};">${stats.neg}</span> | 
                                     <span class="font-medium" style="color: ${typeEfficiency >= 0 ? p.primaryBlue : p.secondaryRed};">${typeEfficiency.toFixed(0)}%</span>
                                 </span>
                             </div>
@@ -372,12 +375,16 @@
                             {
                                 label: 'Acciones Positivas',
                                 data: positiveData,
-                                backgroundColor: p.primaryBlue
+                                backgroundColor: p.primaryBlue,
+                                barPercentage: 0.8, // Controla el ancho de la barra
+                                categoryPercentage: 0.9 // Controla el espacio entre grupos
                             },
                             {
                                 label: 'Acciones Negativas',
                                 data: negativeData,
-                                backgroundColor: p.secondaryRed
+                                backgroundColor: p.neutralOrange, // Color Naranja
+                                barPercentage: 0.8,
+                                categoryPercentage: 0.9
                             }
                         ]
                     },
@@ -386,7 +393,18 @@
                         maintainAspectRatio: false,
                         scales: {
                             x: { stacked: false },
-                            y: { stacked: false, beginAtZero: true }
+                            y: { 
+                                stacked: false, 
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1, // Asegura que solo haya pasos de 1
+                                    callback: function(value) {
+                                        if (Number.isInteger(value)) {
+                                            return value;
+                                        }
+                                    }
+                                } 
+                            }
                         }
                     }
                 });
@@ -428,7 +446,7 @@
 
                 summaryDiv.innerHTML = `
                     <p class="score-positive">Puntos Positivos: ${totalPositive}</p>
-                    <p class="score-negative">Puntos Negativos: ${totalNegative}</p>
+                    <p class="score-neutral" style="color: ${p.neutralOrange};">Puntos Negativos: ${totalNegative}</p>
                     <p class="stat-row-text-dark">Total de Acciones con Valor: ${totalActions}</p>
                 `;
 
@@ -445,12 +463,16 @@
                             {
                                 label: 'Acciones Positivas Acumuladas',
                                 data: [totalPositive],
-                                backgroundColor: p.primaryBlue
+                                backgroundColor: p.primaryBlue,
+                                barPercentage: 0.5, // Barras más finas
+                                categoryPercentage: 0.5 // Controla el ancho del grupo
                             },
                             {
                                 label: 'Acciones Negativas Acumuladas',
                                 data: [totalNegative],
-                                backgroundColor: p.secondaryRed
+                                backgroundColor: p.neutralOrange, // Color Naranja
+                                barPercentage: 0.5,
+                                categoryPercentage: 0.5
                             }
                         ]
                     },
@@ -458,8 +480,19 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: {
-                            x: { stacked: false }, // Agrupadas
-                            y: { stacked: false, beginAtZero: true }
+                            x: { stacked: false },
+                            y: { 
+                                stacked: false, 
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1, // Asegura que solo haya pasos de 1
+                                    callback: function(value) {
+                                        if (Number.isInteger(value)) {
+                                            return value;
+                                        }
+                                    }
+                                } 
+                            }
                         },
                         plugins: {
                             legend: {
