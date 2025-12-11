@@ -113,7 +113,7 @@
             </div>
             
             <div class="card p-6 rounded-lg mt-8">
-                <h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Gráfica Total de Acciones (Acumulado del Juego)</h2>
+                <h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Gráfica de Acciones por Tipo (Acumulado del Juego)</h2>
                 <div class="h-96">
                     <canvas id="accumulatedBarChart"></canvas>
                 </div>
@@ -344,7 +344,7 @@
                 i.innerHTML = statsHtml;
             }
 
-            // 3. Gráfica de Barras (barChart) - Usa m_current_set (Barras Agrupadas)
+            // 3. Gráfica de Barras (barChart) - Usa m_current_set (Barras Agrupadas, Set Actual)
             function updateBarChart() {
                 const actionTotals = {};
                 Object.keys(o).forEach(key => actionTotals[key] = { pos: 0, neg: 0 });
@@ -376,13 +376,13 @@
                                 label: 'Acciones Positivas',
                                 data: positiveData,
                                 backgroundColor: p.primaryBlue,
-                                barPercentage: 0.8, // Controla el ancho de la barra
-                                categoryPercentage: 0.9 // Controla el espacio entre grupos
+                                barPercentage: 0.8, 
+                                categoryPercentage: 0.9 
                             },
                             {
                                 label: 'Acciones Negativas',
                                 data: negativeData,
-                                backgroundColor: p.neutralOrange, // Color Naranja
+                                backgroundColor: p.neutralOrange, 
                                 barPercentage: 0.8,
                                 categoryPercentage: 0.9
                             }
@@ -397,7 +397,7 @@
                                 stacked: false, 
                                 beginAtZero: true,
                                 ticks: {
-                                    stepSize: 1, // Asegura que solo haya pasos de 1
+                                    stepSize: 1, 
                                     callback: function(value) {
                                         if (Number.isInteger(value)) {
                                             return value;
@@ -411,21 +411,34 @@
             }
 
 
-            // 4. Gráfica de Barras Acumuladas (TOTALES) - Usa m (Log de Juego Acumulado)
+            // 4. Gráfica de Barras Acumuladas (TOTALES POR ACCIÓN) - Usa m (Log de Juego Completo)
             function updateAccumulatedBarChart() {
+                const actionTotals = {};
                 let totalPositive = 0;
                 let totalNegative = 0;
 
-                // USA EL LOG ACUMULADO (m)
+                Object.keys(o).forEach(key => actionTotals[key] = { pos: 0, neg: 0 });
+
+                // USAMOS EL LOG COMPLETO (m)
                 m.forEach(log => {
-                    const score = n[log.action]; 
+                    const score = n[log.action];
                     const quantity = log.quantity || 1;
-                    if (score > 0) {
-                        totalPositive += quantity;
-                    } else if (score < 0) {
-                        totalNegative += quantity;
+                    const actionType = log.action.charAt(0);
+                    
+                    if (actionTotals[actionType]) {
+                        if (score > 0) {
+                            actionTotals[actionType].pos += quantity;
+                            totalPositive += quantity;
+                        } else if (score < 0) {
+                            actionTotals[actionType].neg += quantity;
+                            totalNegative += quantity;
+                        }
                     }
                 });
+                
+                const labels = Object.values(o);
+                const positiveData = labels.map(label => actionTotals[Object.keys(o).find(key => o[key] === label)]?.pos || 0);
+                const negativeData = labels.map(label => actionTotals[Object.keys(o).find(key => o[key] === label)]?.neg || 0);
 
                 const totalActions = totalPositive + totalNegative;
                 const ctx = document.getElementById('accumulatedBarChart').getContext('2d');
@@ -445,8 +458,8 @@
                 chartContainer.style.display = 'block';
 
                 summaryDiv.innerHTML = `
-                    <p class="score-positive">Puntos Positivos: ${totalPositive}</p>
-                    <p class="score-neutral" style="color: ${p.neutralOrange};">Puntos Negativos: ${totalNegative}</p>
+                    <p class="score-positive">Puntos Positivos Acumulados: ${totalPositive}</p>
+                    <p class="score-neutral" style="color: ${p.neutralOrange};">Puntos Negativos Acumulados: ${totalNegative}</p>
                     <p class="stat-row-text-dark">Total de Acciones con Valor: ${totalActions}</p>
                 `;
 
@@ -454,25 +467,25 @@
                     accumulatedBarChartInstance.destroy();
                 }
                 
-                // Creamos la nueva gráfica de barras
+                // Creamos la gráfica de barras detallada
                 accumulatedBarChartInstance = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: ['Total'], // Un solo grupo
+                        labels: labels, // Ahora usa los tipos de acción (Servicio, Ataque, etc.)
                         datasets: [
                             {
                                 label: 'Acciones Positivas Acumuladas',
-                                data: [totalPositive],
+                                data: positiveData,
                                 backgroundColor: p.primaryBlue,
-                                barPercentage: 0.5, // Barras más finas
-                                categoryPercentage: 0.5 // Controla el ancho del grupo
+                                barPercentage: 0.8, // Barras finas
+                                categoryPercentage: 0.9 
                             },
                             {
                                 label: 'Acciones Negativas Acumuladas',
-                                data: [totalNegative],
-                                backgroundColor: p.neutralOrange, // Color Naranja
-                                barPercentage: 0.5,
-                                categoryPercentage: 0.5
+                                data: negativeData,
+                                backgroundColor: p.neutralOrange, 
+                                barPercentage: 0.8,
+                                categoryPercentage: 0.9
                             }
                         ]
                     },
@@ -485,7 +498,7 @@
                                 stacked: false, 
                                 beginAtZero: true,
                                 ticks: {
-                                    stepSize: 1, // Asegura que solo haya pasos de 1
+                                    stepSize: 1, 
                                     callback: function(value) {
                                         if (Number.isInteger(value)) {
                                             return value;
