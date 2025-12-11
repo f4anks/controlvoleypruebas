@@ -106,16 +106,16 @@
             </div>
 
             <div class="card p-6 rounded-lg mt-8">
-                <h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Gráfica General del Equipo (Positivos vs Negativos)</h2>
+                <h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Gráfica General del Equipo (Positivos vs Negativos - Set Actual)</h2>
                 <div class="h-96">
                     <canvas id="barChart"></canvas>
                 </div>
             </div>
             
             <div class="card p-6 rounded-lg mt-8">
-                <h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Gráficas Generales del Juego (Puntos Totales Acumulados)</h2>
-                <div class="h-96 flex justify-center items-center">
-                    <canvas id="doughnutChart" class="max-h-80"></canvas>
+                <h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Gráfica Total de Acciones (Acumulado del Juego)</h2>
+                <div class="h-96">
+                    <canvas id="accumulatedBarChart"></canvas>
                 </div>
                 <div id="totalPointsSummary" class="text-center mt-4 text-lg font-semibold stat-row-text-dark">
                     </div>
@@ -130,7 +130,8 @@
 
     <script>
         let barChartInstance = null;
-        let doughnutChartInstance = null; 
+        // Cambiamos el nombre de la variable de instancia
+        let accumulatedBarChartInstance = null; 
 
         document.addEventListener('DOMContentLoaded', () => {
             const a = document.getElementById('playerNumberInput'),
@@ -147,7 +148,7 @@
             
             let l = [], // l: players
                 m = [], // m: actionLog - Log de acciones del JUEGO COMPLETO (ACUMULADO)
-                m_current_set = []; // NUEVO: Log de acciones del SET ACTUAL (Temporal para stats y borrado)
+                m_current_set = []; // Log de acciones del SET ACTUAL (Temporal para stats y borrado)
 
             const n = { // n: scoreMap
                 'S# Servicio Positivo': 1, 'A# Ataque Positivo': 1, 'B# Bloqueo Positivo': 1, 
@@ -170,8 +171,8 @@
             // Guarda datos en localStorage
             function q() {
                 localStorage.setItem('volleyballPlayers', JSON.stringify(l));
-                localStorage.setItem('volleyballActionLog', JSON.stringify(m)); // Solo el log acumulado
-                localStorage.setItem('volleyballCurrentSetLog', JSON.stringify(m_current_set)); // Log del set actual
+                localStorage.setItem('volleyballActionLog', JSON.stringify(m)); 
+                localStorage.setItem('volleyballCurrentSetLog', JSON.stringify(m_current_set)); 
             }
             
             // Carga datos desde localStorage
@@ -227,13 +228,12 @@
             
             // 1. Estadísticas por Atleta (h) - Usa m_current_set
             function updateScoreContainer() {
-                h.innerHTML = ''; // Limpiar contenedor
+                h.innerHTML = ''; 
                 if (l.length === 0) {
                     h.innerHTML = '<p class="stat-row-text-dark text-center py-8">Aún no hay atletas. ¡Agrégalos para empezar!</p>';
                     return;
                 }
                 
-                // Agrupar estadísticas del set actual (m_current_set)
                 const playerStats = {};
                 l.forEach(player => {
                     playerStats[player.number] = { totalPos: 0, totalNeg: 0, efficiency: 0, actions: {} };
@@ -243,7 +243,7 @@
                     const stats = playerStats[log.playerNumber];
                     const score = n[log.action];
                     const quantity = log.quantity || 1;
-                    const actionType = log.action.charAt(0); // S, A, B, R, C, D
+                    const actionType = log.action.charAt(0); 
 
                     if (stats) {
                         if (score > 0) stats.totalPos += quantity;
@@ -255,7 +255,6 @@
                     }
                 });
                 
-                // Renderizar
                 l.sort((p1, p2) => p1.number - p2.number);
                 l.forEach(player => {
                     const stats = playerStats[player.number];
@@ -386,21 +385,16 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: {
-                            x: { 
-                                stacked: false // Agrupadas
-                            },
-                            y: { 
-                                stacked: false, // Agrupadas
-                                beginAtZero: true 
-                            }
+                            x: { stacked: false },
+                            y: { stacked: false, beginAtZero: true }
                         }
                     }
                 });
             }
 
 
-            // 4. Gráfica de Dona (doughnutChart) - Usa m (Log de Juego Acumulado)
-            function updateDoughnutChart() {
+            // 4. Gráfica de Barras Acumuladas (TOTALES) - Usa m (Log de Juego Acumulado)
+            function updateAccumulatedBarChart() {
                 let totalPositive = 0;
                 let totalNegative = 0;
 
@@ -416,20 +410,21 @@
                 });
 
                 const totalActions = totalPositive + totalNegative;
-                const ctx = document.getElementById('doughnutChart').getContext('2d');
+                const ctx = document.getElementById('accumulatedBarChart').getContext('2d');
                 const summaryDiv = document.getElementById('totalPointsSummary');
+                const chartContainer = document.getElementById('accumulatedBarChart');
 
                 if (totalActions === 0) {
                     summaryDiv.innerHTML = 'No se han registrado acciones aún para las gráficas generales.';
-                    if (doughnutChartInstance) {
-                        doughnutChartInstance.destroy();
-                        doughnutChartInstance = null;
+                    chartContainer.style.display = 'none';
+                    if (accumulatedBarChartInstance) {
+                        accumulatedBarChartInstance.destroy();
+                        accumulatedBarChartInstance = null;
                     }
-                    document.getElementById('doughnutChart').style.display = 'none';
                     return;
                 }
 
-                document.getElementById('doughnutChart').style.display = 'block';
+                chartContainer.style.display = 'block';
 
                 summaryDiv.innerHTML = `
                     <p class="score-positive">Puntos Positivos: ${totalPositive}</p>
@@ -437,39 +432,42 @@
                     <p class="stat-row-text-dark">Total de Acciones con Valor: ${totalActions}</p>
                 `;
 
-                if (doughnutChartInstance) {
-                    doughnutChartInstance.destroy();
+                if (accumulatedBarChartInstance) {
+                    accumulatedBarChartInstance.destroy();
                 }
-
-                doughnutChartInstance = new Chart(ctx, {
-                    type: 'doughnut',
+                
+                // Creamos la nueva gráfica de barras
+                accumulatedBarChartInstance = new Chart(ctx, {
+                    type: 'bar',
                     data: {
-                        labels: ['Puntos Positivos', 'Puntos Negativos'],
-                        datasets: [{
-                            data: [totalPositive, totalNegative],
-                            backgroundColor: [
-                                p.primaryBlue,
-                                p.secondaryRed
-                            ],
-                            hoverOffset: 8,
-                            borderWidth: 2,
-                            borderColor: p.cardBg
-                        }]
+                        labels: ['Total'], // Un solo grupo
+                        datasets: [
+                            {
+                                label: 'Acciones Positivas Acumuladas',
+                                data: [totalPositive],
+                                backgroundColor: p.primaryBlue
+                            },
+                            {
+                                label: 'Acciones Negativas Acumuladas',
+                                data: [totalNegative],
+                                backgroundColor: p.secondaryRed
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        cutout: '70%',
+                        scales: {
+                            x: { stacked: false }, // Agrupadas
+                            y: { stacked: false, beginAtZero: true }
+                        },
                         plugins: {
                             legend: {
                                 position: 'bottom',
                                 labels: { color: p.textDark, font: { size: 14, family: 'Inter' } }
                             },
                             title: {
-                                display: true,
-                                text: 'Proporción de Rendimiento Global',
-                                color: p.textDark,
-                                font: { size: 16, family: 'Inter', weight: 'bold' }
+                                display: false 
                             }
                         }
                     }
@@ -485,7 +483,7 @@
                 updateBarChart();
                 
                 // Actualiza las estadísticas ACUMULADAS del JUEGO
-                updateDoughnutChart();
+                updateAccumulatedBarChart();
             }
             
             // ----------------------------------------------------------------------
