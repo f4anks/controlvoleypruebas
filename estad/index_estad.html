@@ -113,14 +113,14 @@
             </div>
             
             <div class="card p-6 rounded-lg mt-8">
-                <h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Gráficas Generales del Juego (Puntos Totales)</h2>
+                <h2 class="text-2xl font-semibold mb-4 pb-2" style="border-bottom: 1px solid var(--color-primary-blue); color: var(--color-primary-blue);">Gráficas Generales del Juego (Puntos Totales Acumulados)</h2>
                 <div class="h-96 flex justify-center items-center">
                     <canvas id="doughnutChart" class="max-h-80"></canvas>
                 </div>
                 <div id="totalPointsSummary" class="text-center mt-4 text-lg font-semibold stat-row-text-dark">
                     </div>
             </div>
-            </div>
+        </div>
     </main>
 
     <footer class="mt-8 text-sm w-full max-w-5xl">
@@ -130,7 +130,7 @@
 
     <script>
         let barChartInstance = null;
-        let doughnutChartInstance = null; // Instancia para la gráfica de dona
+        let doughnutChartInstance = null; 
 
         document.addEventListener('DOMContentLoaded', () => {
             const a = document.getElementById('playerNumberInput'),
@@ -146,35 +146,21 @@
                 k = document.getElementById('clearGameDataBtn');
             
             let l = [], // l: players
-                m = []; // m: actionLog
+                m = [], // m: actionLog - Log de acciones del JUEGO COMPLETO (ACUMULADO)
+                m_current_set = []; // NUEVO: Log de acciones del SET ACTUAL (Temporal para stats y borrado)
 
             const n = { // n: scoreMap
-                'S# Servicio Positivo': 1,
-                'A# Ataque Positivo': 1,
-                'B# Bloqueo Positivo': 1,
-                'R# Recepción Positiva': 1,
-                'C# Coloque Positivo': 1,
-                'D# Defensa Positiva': 1,
-                'S= Servicio Negativo': -1,
-                'A= Ataque Negativo': -1,
-                'B= Bloqueo Negativo': -1,
-                'R= Recepción Negativo': -1,
-                'C= Coloque Negativo': -1,
-                'D= Defensa Negativa': -1
+                'S# Servicio Positivo': 1, 'A# Ataque Positivo': 1, 'B# Bloqueo Positivo': 1, 
+                'R# Recepción Positiva': 1, 'C# Coloque Positivo': 1, 'D# Defensa Positiva': 1,
+                'S= Servicio Negativo': -1, 'A= Ataque Negativo': -1, 'B= Bloqueo Negativo': -1, 
+                'R= Recepción Negativo': -1, 'C= Coloque Negativo': -1, 'D= Defensa Negativa': -1
             },
-            o = { // o: actionTypes
-                S: 'Servicio',
-                A: 'Ataque',
-                B: 'Bloqueo',
-                R: 'Recepción',
-                C: 'Coloque',
-                D: 'Defensa'
+            o = { // o: actionTypes (solo las letras iniciales)
+                S: 'Servicio', A: 'Ataque', B: 'Bloqueo', R: 'Recepción', C: 'Coloque', D: 'Defensa'
             },
             p = { // p: colorMap
-                primaryBlue: '#0056FF',
-                secondaryRed: '#dc2626',
-                textDark: '#1f2937',
-                cardBg: '#ffffff'
+                primaryBlue: '#0056FF', secondaryRed: '#dc2626', textDark: '#1f2937', cardBg: '#ffffff',
+                neutralOrange: '#f97316', successGreen: '#10b981'
             };
 
             // ----------------------------------------------------------------------
@@ -184,7 +170,8 @@
             // Guarda datos en localStorage
             function q() {
                 localStorage.setItem('volleyballPlayers', JSON.stringify(l));
-                localStorage.setItem('volleyballActionLog', JSON.stringify(m));
+                localStorage.setItem('volleyballActionLog', JSON.stringify(m)); // Solo el log acumulado
+                localStorage.setItem('volleyballCurrentSetLog', JSON.stringify(m_current_set)); // Log del set actual
             }
             
             // Carga datos desde localStorage
@@ -193,6 +180,8 @@
                 a && (l = JSON.parse(a));
                 const b = localStorage.getItem('volleyballActionLog');
                 b && (m = JSON.parse(b));
+                const setLog = localStorage.getItem('volleyballCurrentSetLog');
+                setLog && (m_current_set = JSON.parse(setLog));
             }
 
             // Actualiza el estilo del select de acción
@@ -204,14 +193,14 @@
                 return c;
             }
 
-            // [LÓGICA FALTANTE] Llena el select de atletas (d)
+            // Llena el select de atletas (d)
             function populatePlayerSelect() {
                 d.innerHTML = '';
                 if (l.length === 0) {
                     d.innerHTML = '<option disabled selected>Agregar atleta primero</option>';
                     return;
                 }
-                l.sort((p1, p2) => p1.number - p2.number); // Ordenar por número
+                l.sort((p1, p2) => p1.number - p2.number);
                 l.forEach(player => {
                     const option = document.createElement('option');
                     option.value = player.number;
@@ -220,7 +209,7 @@
                 });
             }
 
-            // [LÓGICA FALTANTE] Llena el select de acciones (e)
+            // Llena el select de acciones (e)
             function populateActionSelect() {
                 e.innerHTML = '';
                 Object.keys(n).forEach(action => {
@@ -231,19 +220,187 @@
                 });
                 s(); // Establecer color inicial
             }
+            
+            // ----------------------------------------------------------------------
+            // FUNCIONES DE ESTADÍSTICA (NUEVAS O COMPLETADAS)
+            // ----------------------------------------------------------------------
+            
+            // 1. Estadísticas por Atleta (h)
+            function updateScoreContainer() {
+                h.innerHTML = ''; // Limpiar contenedor
+                if (l.length === 0) {
+                    h.innerHTML = '<p class="stat-row-text-dark text-center py-8">Aún no hay atletas. ¡Agrégalos para empezar!</p>';
+                    return;
+                }
+                
+                // Agrupar estadísticas del set actual (m_current_set)
+                const playerStats = {};
+                l.forEach(player => {
+                    playerStats[player.number] = { totalPos: 0, totalNeg: 0, efficiency: 0, actions: {} };
+                });
 
-            // [LÓGICA FALTANTE] Actualiza todas las estadísticas y gráficas
-            function updateAllStats() {
-                // Aquí irían las llamadas a updateScoreContainer(), updateGeneralStats(), updateBarChart()
-                // Por ahora, solo llamamos a la que sí creamos:
-                updateDoughnutChart();
+                m_current_set.forEach(log => {
+                    const stats = playerStats[log.playerNumber];
+                    const score = n[log.action];
+                    const quantity = log.quantity || 1;
+                    const actionType = log.action.charAt(0); // S, A, B, R, C, D
+
+                    if (stats) {
+                        if (score > 0) stats.totalPos += quantity;
+                        else if (score < 0) stats.totalNeg += quantity;
+
+                        if (!stats.actions[actionType]) stats.actions[actionType] = { pos: 0, neg: 0 };
+                        if (score > 0) stats.actions[actionType].pos += quantity;
+                        else if (score < 0) stats.actions[actionType].neg += quantity;
+                    }
+                });
+                
+                // Renderizar
+                l.sort((p1, p2) => p1.number - p2.number);
+                l.forEach(player => {
+                    const stats = playerStats[player.number];
+                    const totalActions = stats.totalPos + stats.totalNeg;
+                    stats.efficiency = totalActions > 0 ? ((stats.totalPos - stats.totalNeg) / totalActions) * 100 : 0;
+                    
+                    let actionDetails = '';
+                    Object.keys(o).forEach(key => {
+                        const typeStats = stats.actions[key];
+                        if (typeStats) {
+                            actionDetails += `<span class="text-sm font-medium mr-3">${key}: <span class="score-positive">${typeStats.pos}</span> | <span class="score-negative">${typeStats.neg}</span></span>`;
+                        }
+                    });
+
+                    h.innerHTML += `
+                        <div class="stat-row-bg p-3 rounded-lg flex justify-between items-center shadow-sm">
+                            <div class="font-bold w-1/4 stat-row-text-dark">#${player.number} ${player.name}</div>
+                            <div class="w-2/4 text-xs">${actionDetails || 'Sin acciones en este Set.'}</div>
+                            <div class="w-1/4 text-right">
+                                <span class="font-bold text-lg" style="color: ${stats.efficiency >= 0 ? p.successGreen : p.secondaryRed};">
+                                    ${stats.efficiency.toFixed(1)}%
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                });
             }
 
-            // [NUEVA FUNCIÓN] Inicializar o actualizar la gráfica de dona (Puntos Totales)
+            // 2. Estadística General por Equipo (i)
+            function updateGeneralStats() {
+                i.innerHTML = '';
+                if (m_current_set.length === 0) {
+                    i.innerHTML = '<p class="stat-row-text-dark text-center py-8">Registra acciones para ver el resumen.</p>';
+                    return;
+                }
+                
+                const teamStats = {};
+                let totalActions = 0;
+                let teamPos = 0;
+                let teamNeg = 0;
+
+                m_current_set.forEach(log => {
+                    const score = n[log.action];
+                    const quantity = log.quantity || 1;
+                    const actionType = log.action.charAt(0);
+
+                    if (!teamStats[actionType]) teamStats[actionType] = { pos: 0, neg: 0 };
+                    
+                    if (score > 0) {
+                        teamStats[actionType].pos += quantity;
+                        teamPos += quantity;
+                    } else if (score < 0) {
+                        teamStats[actionType].neg += quantity;
+                        teamNeg += quantity;
+                    }
+                    totalActions += quantity;
+                });
+                
+                const totalEfficiency = totalActions > 0 ? ((teamPos - teamNeg) / totalActions) * 100 : 0;
+
+                let statsHtml = `
+                    <div class="flex justify-between items-center stat-row-bg p-3 rounded-lg font-bold">
+                        <span>Eficiencia Total del Equipo:</span>
+                        <span class="text-xl" style="color: ${totalEfficiency >= 0 ? p.successGreen : p.secondaryRed};">${totalEfficiency.toFixed(1)}%</span>
+                    </div>
+                `;
+
+                Object.keys(o).forEach(key => {
+                    const stats = teamStats[key];
+                    if (stats) {
+                        const typeTotal = stats.pos + stats.neg;
+                        const typeEfficiency = typeTotal > 0 ? ((stats.pos - stats.neg) / typeTotal) * 100 : 0;
+                        statsHtml += `
+                            <div class="p-3 border-b border-gray-200 flex justify-between stat-row-text-dark">
+                                <span>${o[key]} (${typeTotal} acciones):</span>
+                                <span><span class="score-positive">${stats.pos}</span> | <span class="score-negative">${stats.neg}</span> | 
+                                    <span class="font-medium" style="color: ${typeEfficiency >= 0 ? p.primaryBlue : p.secondaryRed};">${typeEfficiency.toFixed(0)}%</span>
+                                </span>
+                            </div>
+                        `;
+                    }
+                });
+                
+                i.innerHTML = statsHtml;
+            }
+
+            // 3. Gráfica de Barras (barChart) - Log del Set Actual (m_current_set)
+            function updateBarChart() {
+                // Cálculo de Positivos/Negativos por tipo de acción (igual que en updateGeneralStats)
+                const actionTotals = {};
+                Object.keys(o).forEach(key => actionTotals[key] = { pos: 0, neg: 0 });
+
+                m_current_set.forEach(log => {
+                    const score = n[log.action];
+                    const quantity = log.quantity || 1;
+                    const actionType = log.action.charAt(0);
+                    
+                    if (actionTotals[actionType]) {
+                        if (score > 0) actionTotals[actionType].pos += quantity;
+                        else if (score < 0) actionTotals[actionType].neg += quantity;
+                    }
+                });
+                
+                const labels = Object.values(o);
+                const positiveData = labels.map(label => actionTotals[Object.keys(o).find(key => o[key] === label)]?.pos || 0);
+                const negativeData = labels.map(label => actionTotals[Object.keys(o).find(key => o[key] === label)]?.neg || 0);
+
+                if (barChartInstance) barChartInstance.destroy();
+
+                const ctx = document.getElementById('barChart').getContext('2d');
+                barChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Acciones Positivas',
+                                data: positiveData,
+                                backgroundColor: p.primaryBlue
+                            },
+                            {
+                                label: 'Acciones Negativas',
+                                data: negativeData,
+                                backgroundColor: p.secondaryRed
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { stacked: true },
+                            y: { stacked: true, beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+
+            // 4. Gráfica de Dona (doughnutChart) - Log del Juego Completo (m)
             function updateDoughnutChart() {
                 let totalPositive = 0;
                 let totalNegative = 0;
 
+                // **USA EL LOG ACUMULADO (m)**
                 m.forEach(log => {
                     const score = n[log.action]; 
                     const quantity = log.quantity || 1;
@@ -302,10 +459,7 @@
                         plugins: {
                             legend: {
                                 position: 'bottom',
-                                labels: {
-                                    color: p.textDark,
-                                    font: { size: 14, family: 'Inter' }
-                                }
+                                labels: { color: p.textDark, font: { size: 14, family: 'Inter' } }
                             },
                             title: {
                                 display: true,
@@ -317,28 +471,32 @@
                     }
                 });
             }
+
+
+            // FUNCIÓN MAESTRA PARA ACTUALIZAR TODO
+            function updateAllStats() {
+                // Actualiza las estadísticas del SET ACTUAL
+                updateScoreContainer();
+                updateGeneralStats();
+                updateBarChart();
+                
+                // Actualiza las estadísticas ACUMULADAS del JUEGO
+                updateDoughnutChart();
+            }
             
             // ----------------------------------------------------------------------
             // MANEJADORES DE EVENTOS
             // ----------------------------------------------------------------------
 
-            // [LÓGICA FALTANTE] Manejador para agregar atleta (c)
+            // Manejador para agregar atleta (c)
             c.addEventListener('click', () => {
                 const number = parseInt(a.value.trim());
                 const name = b.value.trim();
 
-                if (isNaN(number) || number <= 0) {
-                    alert('Por favor, ingresa un número de atleta válido.');
-                    a.focus();
+                if (isNaN(number) || number <= 0 || name === '') {
+                    alert('Por favor, ingresa un número y nombre de atleta válidos.');
                     return;
                 }
-                if (name === '') {
-                    alert('Por favor, ingresa el nombre del atleta.');
-                    b.focus();
-                    return;
-                }
-
-                // Verificar si el número ya existe
                 if (l.some(player => player.number === number)) {
                     alert(`El número ${number} ya está asignado a un atleta.`);
                     a.focus();
@@ -346,41 +504,19 @@
                 }
 
                 l.push({ number: number, name: name });
-                q(); // Guardar
-                populatePlayerSelect(); // Actualizar el select
-                updateAllStats(); // Actualizar estadísticas (incluyendo la gráfica de dona)
+                q(); 
+                populatePlayerSelect(); 
+                updateAllStats();
                 
-                // Limpiar inputs
                 a.value = '';
                 b.value = '';
-
                 alert(`Atleta #${number} (${name}) agregado con éxito.`);
             });
 
             // Manejador para cambiar el color del select de acción al seleccionar
             e.addEventListener('change', s);
 
-            // Manejador para el botón "Eliminar Datos del Juego" (k)
-            k.addEventListener('click', () => {
-                if (confirm('¿Estás seguro de que deseas ELIMINAR TODOS los datos del JUEGO (log de acciones y jugadores)? Esta acción es irreversible.')) {
-                    l = []; 
-                    m = []; 
-                    q(); 
-                    window.location.reload(); 
-                }
-            });
-
-            // Manejador para el botón "Eliminar Datos del Set" (j)
-            j.addEventListener('click', () => {
-                if (confirm('¿Estás seguro de que deseas ELIMINAR los datos del SET? (Solo se borran las acciones registradas, los jugadores se mantienen)')) {
-                    m = [];
-                    q(); 
-                    alert('Datos del set eliminados.');
-                    updateAllStats(); // Llama a la actualización de stats/gráficas
-                }
-            });
-
-            // [LÓGICA FALTANTE] Manejador para registrar acción (g)
+            // Manejador para registrar acción (g)
             g.addEventListener('submit', (event) => {
                 event.preventDefault();
                 const playerNumber = parseInt(d.value);
@@ -391,19 +527,44 @@
                     alert('Por favor, selecciona un atleta.');
                     return;
                 }
-
-                // Registro de la acción
-                m.push({
+                
+                const logEntry = {
                     playerNumber: playerNumber,
                     action: action,
                     quantity: quantity,
                     timestamp: new Date().toISOString()
-                });
+                };
 
-                q(); // Guardar
-                updateAllStats(); // Actualizar todas las estadísticas y gráficas
+                // Registra la acción en ambos logs
+                m.push(logEntry); // Log Acumulado (Juego)
+                m_current_set.push(logEntry); // Log Temporal (Set Actual)
+
+                q(); 
+                updateAllStats(); 
 
                 alert(`Acción registrada: #${playerNumber} - ${action} (x${quantity})`);
+            });
+
+
+            // Manejador para el botón "Eliminar Datos del Set" (j)
+            j.addEventListener('click', () => {
+                if (confirm('¿Estás seguro de que deseas ELIMINAR los datos del SET? (Solo se borran las acciones del set actual, el acumulado del juego se mantiene)')) {
+                    m_current_set = []; // Borrar solo el log del set actual
+                    q(); 
+                    alert('Datos del set eliminados. El acumulado del juego se ha conservado.');
+                    updateAllStats(); // Llama a la actualización de stats/gráficas (la de dona no se afecta)
+                }
+            });
+
+            // Manejador para el botón "Eliminar Datos del Juego" (k)
+            k.addEventListener('click', () => {
+                if (confirm('¿Estás seguro de que deseas ELIMINAR TODOS los datos del JUEGO (log de acciones y jugadores)? Esta acción es irreversible.')) {
+                    l = []; // Borrar jugadores
+                    m = []; // Borrar log de juego
+                    m_current_set = []; // Borrar log del set
+                    q(); 
+                    window.location.reload(); 
+                }
             });
 
 
@@ -412,9 +573,9 @@
             // ----------------------------------------------------------------------
             
             r(); // Cargar datos
-            populateActionSelect(); // Inicializar el select de acciones
-            populatePlayerSelect(); // Inicializar el select de atletas (CORREGIDO)
-            updateAllStats(); // Inicializar todas las stats y gráficas (CORREGIDO)
+            populateActionSelect(); 
+            populatePlayerSelect(); 
+            updateAllStats(); 
 
         });
     </script>
