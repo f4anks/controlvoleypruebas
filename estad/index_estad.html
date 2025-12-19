@@ -1,124 +1,280 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Voley Stats Tracker</title>
+    <title>Control Voley - Estadísticas</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <style>
-        :root{
-            --color-main-bg:#F7F8FA;
-            --color-card-bg:#ffffff;
-            --color-text-dark:#1f2937;
-            --color-primary-blue:#0056FF;
-            --color-secondary-red:#dc2626;
-            --color-neutral-orange:#f97316;
-            --color-stat-row-bg:#f3f4f6
+        :root {
+            --color-main-bg: #F7F8FA;
+            --color-card-bg: #ffffff;
+            --color-text-dark: #1f2937;
+            --color-primary-blue: #0056FF;
+            --color-secondary-red: #dc2626;
+            --color-neutral-orange: #f97316;
+            --color-stat-row-bg: #f3f4f6;
         }
-        body{
-            font-family:'Inter',sans-serif;
-            user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;
-            background-color:var(--color-main-bg);
-            display: none; /* Se muestra solo al autenticar */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-main-bg);
+            user-select: none;
         }
-        .card{
-            background-color:var(--color-card-bg);
-            color:var(--color-text-dark);
-            border:1px solid #d1d5db;
-            transition:transform .2s ease-in-out,box-shadow .2s ease-in-out;
-            box-shadow:0 4px 10px -1px rgba(0,86,255,.1),0 2px 5px -2px rgba(0,86,255,.05)
+        .card {
+            background-color: var(--color-card-bg);
+            border: 1px solid #d1d5db;
+            transition: transform .2s ease-in-out, box-shadow .2s ease-in-out;
+            box-shadow: 0 4px 10px -1px rgba(0,86,255,.1);
         }
-        /* ... (resto de tus estilos se mantienen iguales) ... */
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(0,86,255,.2);
+        }
+        .score-positive { color: var(--color-primary-blue); }
+        .score-negative { color: var(--color-secondary-red); }
+        
         .toast-notification {
-            position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
-            background-color: #1f2937; color: white; padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem; z-index: 9999; opacity: 0; transition: opacity 0.3s;
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1f2937;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none;
         }
         .toast-visible { opacity: 1; }
     </style>
 </head>
 
 <body class="text-gray-800 min-h-screen flex flex-col items-center p-4">
-    <main class="w-full max-w-5xl mx-auto space-y-8 shadow-sm">
-        <header class="text-center relative flex flex-col items-center">
-            <div class="w-full flex justify-between items-center mb-6">
-                <a href="index_menu.html" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-md shadow-md hover:bg-blue-700 transition-colors text-sm">Regresar al Menú</a>
-                <button onclick="logout()" class="bg-red-600 text-white font-bold py-2 px-4 rounded-md shadow-md hover:bg-red-700 transition-colors text-sm">Cerrar Sesión</button>
-            </div>
-            
-            <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl">Control Voley <span class="text-yellow-600">Stats Tracker</span></h1>
-            <p class="mt-4 text-lg text-gray-500 font-medium">Monitorea el rendimiento de tus atletas en tiempo real.</p>
+    <main class="w-full max-w-5xl mx-auto space-y-8">
+        <header class="text-center relative">
+            <a href="index_menu.html" class="absolute top-0 right-0 bg-[#0056FF] text-white font-bold py-2 px-4 rounded-md text-sm shadow-md hover:bg-blue-700 transition-colors">
+                Regresar al Menú
+            </a>
+            <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl">
+                Control Voley <span class="text-yellow-600">Stats Tracker</span>
+            </h1>
+            <p class="mt-4 text-lg text-gray-500">Rendimiento y eficiencia en tiempo real.</p>
         </header>
 
         <div class="grid grid-cols-1 gap-8">
             <div class="card p-6 rounded-lg">
-                <h2 class="text-2xl font-semibold mb-4 pb-2 border-b border-blue-600 text-blue-600">Registrar Acción</h2>
+                <h2 class="text-2xl font-semibold mb-4 border-b border-blue-600 text-blue-600">Registrar Atleta</h2>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <input id="playerNumberInput" placeholder="Nro." class="w-full sm:w-24 border p-2 rounded" type="number">
+                    <input id="playerNameInput" placeholder="Nombre del Atleta" class="flex-grow border p-2 rounded" type="text">
+                    <button id="addPlayerBtn" class="bg-blue-600 text-white font-bold py-2 px-6 rounded hover:bg-blue-700 shadow-lg">Agregar</button>
+                </div>
+            </div>
+
+            <div class="card p-6 rounded-lg">
+                <h2 class="text-2xl font-semibold mb-4 border-b border-blue-600 text-blue-600">Registrar Acción</h2>
                 <form id="actionForm" class="space-y-4">
-                    <select id="playerSelect" class="w-full rounded-md px-3 py-2 border border-gray-300"></select>
-                    <select id="actionSelect" class="w-full rounded-md px-3 py-2 border border-gray-300"></select>
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 rounded-md hover:bg-blue-700">Registrar</button>
+                    <div>
+                        <label class="block mb-1 text-sm font-medium">Seleccionar Atleta</label>
+                        <select id="playerSelect" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500"></select>
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-sm font-medium">Tipo de Acción</label>
+                        <select id="actionSelect" class="w-full border p-2 rounded"></select>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded shadow-lg hover:bg-blue-700">Registrar</button>
+                    
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <button type="button" id="clearSetDataBtn" class="bg-yellow-600 text-white py-2 rounded font-bold hover:bg-yellow-700 shadow">Reiniciar Set</button>
+                        <button type="button" id="clearGameDataBtn" class="bg-red-600 text-white py-2 rounded font-bold hover:bg-red-700 shadow">Borrar Todo</button>
+                    </div>
                 </form>
             </div>
-            <div id="scoresContainer" class="card p-6 rounded-lg"></div>
-            <div class="h-96 card p-6 rounded-lg"><canvas id="barChart"></canvas></div>
+
+            <div class="card p-6 rounded-lg">
+                <h2 class="text-2xl font-semibold mb-4 border-b border-blue-600 text-blue-600">Estadística por Atleta</h2>
+                <div id="scoresContainer" class="space-y-3"></div>
+            </div>
+
+            <div class="card p-6 rounded-lg">
+                <h2 class="text-2xl font-semibold mb-4 border-b border-blue-600 text-blue-600">Gráfica del Set</h2>
+                <div class="h-80"><canvas id="barChart"></canvas></div>
+            </div>
+
+            <div class="card p-6 rounded-lg">
+                <h2 class="text-2xl font-semibold mb-4 border-b border-blue-600 text-blue-600">Acumulado del Juego</h2>
+                <div class="h-80"><canvas id="accumulatedBarChart"></canvas></div>
+                <div id="totalPointsSummary" class="text-center mt-4 font-bold text-lg"></div>
+            </div>
         </div>
     </main>
 
-    <script type="module">
-        // --- CONFIGURACIÓN FIREBASE (Basada en tu referencia) ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <footer class="mt-8 py-6 text-center text-gray-500 text-sm border-t w-full max-w-5xl">
+        <p>Copyright © Empresa Sistematikos. Diseñado por Sistematikos - Frank Hernandez</p>
+    </footer>
 
-        const firebaseConfig = { 
-            apiKey: "AIzaSyB5RB7mm1j-0gjCNTUEJTkyEqLjyZ3C7ws",
-            authDomain: "datacontrolvoley-ff556.firebaseapp.com",
-            projectId: "datacontrolvoley-ff556",
-            storageBucket: "datacontrolvoley-ff556.firebasestorage.app",
-            messagingSenderId: "516409072606",
-            appId: "1:516409072606:web:132538dba358a077d71b4f" 
-        };
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Variables de Datos
+            let players = JSON.parse(localStorage.getItem('volleyballPlayers')) || [];
+            let actionLog = JSON.parse(localStorage.getItem('volleyballActionLog')) || [];
+            let currentSetLog = JSON.parse(localStorage.getItem('volleyballCurrentSetLog')) || [];
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // --- LÓGICA DE PROTECCIÓN ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists() && userDoc.data().teamId) {
-                    // USUARIO VÁLIDO: Mostramos la página e inicializamos la app
-                    document.body.style.display = "block";
-                    initializeAppLogic(); 
-                } else {
-                    alert("No tienes un equipo asignado.");
-                    await signOut(auth);
-                    window.location.href = 'index.html';
-                }
-            } else {
-                // NO LOGUEADO
-                window.location.href = 'index.html';
-            }
-        });
-
-        window.logout = async function() {
-            await signOut(auth);
-            window.location.href = 'index.html';
-        };
-
-        // --- TODA TU LÓGICA ORIGINAL DE ESTADÍSTICAS VA AQUÍ DENTRO ---
-        function initializeAppLogic() {
-            // Aquí pegas todo el código de 'document.addEventListener('DOMContentLoaded'...'
-            // que tenías antes (las variables l, m, m_current_set, funciones de gráficas, etc.)
-            console.log("App de Estadísticas Inicializada para el club");
-            
-            // Ejemplo de enganche de eventos:
+            // Referencias DOM
+            const playerNumInp = document.getElementById('playerNumberInput');
+            const playerNameInp = document.getElementById('playerNameInput');
+            const addPlayerBtn = document.getElementById('addPlayerBtn');
+            const playerSel = document.getElementById('playerSelect');
+            const actionSel = document.getElementById('actionSelect');
+            const scoresCont = document.getElementById('scoresContainer');
             const actionForm = document.getElementById('actionForm');
-            // ... resto de tu lógica ...
-        }
+
+            // Configuración
+            const scores = { 
+                'Servicio Bueno S#': 1, 'Ataque Bueno A#': 1, 'Bloqueo Bueno B#': 1, 'Coloque Bueno C#': 1,
+                'Servicio Malo S=': -1, 'Ataque Malo A=': -1, 'Bloqueo Malo B=': -1, 'Recepción Mala R=': -1, 'Coloque Malo C=': -1, 'Defensa Mala D=': -1
+            };
+            const typeMap = { S: 'Servicio', A: 'Ataque', B: 'Bloqueo', R: 'Recepción', C: 'Coloque', D: 'Defensa' };
+
+            let barChart = null;
+            let accumulatedChart = null;
+
+            function save() {
+                localStorage.setItem('volleyballPlayers', JSON.stringify(players));
+                localStorage.setItem('volleyballActionLog', JSON.stringify(actionLog));
+                localStorage.setItem('volleyballCurrentSetLog', JSON.stringify(currentSetLog));
+            }
+
+            function showToast(msg) {
+                const toast = document.createElement('div');
+                toast.className = 'toast-notification toast-visible';
+                toast.textContent = msg;
+                document.body.appendChild(toast);
+                setTimeout(() => { toast.remove(); }, 2000);
+            }
+
+            function updateUI() {
+                // Actualizar Select de Jugadores
+                playerSel.innerHTML = players.length ? '' : '<option disabled selected>Agregue atletas primero</option>';
+                players.sort((a,b) => a.number - b.number).forEach(p => {
+                    playerSel.innerHTML += `<option value="${p.number}">#${p.number} - ${p.name}</option>`;
+                });
+
+                // Calcular Estadísticas
+                scoresCont.innerHTML = players.length ? '' : '<p class="text-center text-gray-500">No hay atletas registrados.</p>';
+                
+                players.forEach(p => {
+                    const pStats = currentSetLog.filter(log => log.playerNumber == p.number);
+                    let pos = 0, neg = 0;
+                    pStats.forEach(log => scores[log.action] > 0 ? pos++ : neg++);
+                    
+                    const total = pos + neg;
+                    const diff = pos - neg;
+                    const eff = total > 0 ? ((diff / total) * 100).toFixed(1) : 0;
+
+                    scoresCont.innerHTML += `
+                        <div class="bg-gray-100 p-3 rounded flex justify-between items-center shadow-sm">
+                            <span class="font-bold">#${p.number} ${p.name}</span>
+                            <span>Pos: <span class="text-blue-600">${pos}</span> | Neg: <span class="text-red-600">${neg}</span></span>
+                            <span class="font-bold ${eff >= 0 ? 'text-green-600' : 'text-red-600'}">${eff}% Eff</span>
+                        </div>`;
+                });
+
+                renderCharts();
+            }
+
+            function renderCharts() {
+                const labels = Object.values(typeMap);
+                const getData = (logSource) => {
+                    const pos = labels.map(() => 0);
+                    const neg = labels.map(() => 0);
+                    logSource.forEach(log => {
+                        const char = log.action.charAt(log.action.length - 2);
+                        const idx = Object.keys(typeMap).indexOf(char);
+                        if(idx !== -1) scores[log.action] > 0 ? pos[idx]++ : neg[idx]++;
+                    });
+                    return { pos, neg };
+                };
+
+                const currentData = getData(currentSetLog);
+                const accData = getData(actionLog);
+
+                if(barChart) barChart.destroy();
+                barChart = new Chart(document.getElementById('barChart'), {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [
+                            { label: 'Positivas', data: currentData.pos, backgroundColor: '#0056FF' },
+                            { label: 'Negativas', data: currentData.neg, backgroundColor: '#f97316' }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+
+                if(accumulatedChart) accumulatedChart.destroy();
+                accumulatedChart = new Chart(document.getElementById('accumulatedBarChart'), {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [
+                            { label: 'Total Positivas', data: accData.pos, backgroundColor: '#0056FF' },
+                            { label: 'Total Negativas', data: accData.neg, backgroundColor: '#f97316' }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+
+            // Eventos
+            addPlayerBtn.addEventListener('click', () => {
+                const num = parseInt(playerNumInp.value);
+                const name = playerNameInp.value.trim();
+                if(!num || !name) return alert("Complete los datos");
+                if(players.find(p => p.number == num)) return alert("Número ya existe");
+                
+                players.push({ number: num, name });
+                save(); updateUI();
+                playerNumInp.value = ''; playerNameInp.value = '';
+                showToast("Atleta agregado");
+            });
+
+            actionForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const playerNumber = playerSel.value;
+                const action = actionSel.value;
+                if(!playerNumber || !action) return;
+
+                const entry = { playerNumber, action, timestamp: new Date().toISOString() };
+                actionLog.push(entry);
+                currentSetLog.push(entry);
+                save(); updateUI();
+                showToast("Acción registrada");
+            });
+
+            document.getElementById('clearSetDataBtn').addEventListener('click', () => {
+                if(confirm("¿Reiniciar el set actual?")) {
+                    currentSetLog = []; save(); updateUI();
+                }
+            });
+
+            document.getElementById('clearGameDataBtn').addEventListener('click', () => {
+                if(confirm("¿BORRAR TODO EL JUEGO Y ATLETAS?")) {
+                    localStorage.clear(); location.reload();
+                }
+            });
+
+            // Inicializar Select Acción
+            Object.keys(scores).forEach(s => {
+                actionSel.innerHTML += `<option value="${s}">${s}</option>`;
+            });
+
+            updateUI();
+        });
     </script>
 </body>
 </html>
