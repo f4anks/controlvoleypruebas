@@ -14,7 +14,7 @@
             --color-text-dark:#1f2937;
             --color-primary-blue:#0056FF;
             --color-secondary-red:#dc2626;
-            --color-neutral-orange:#f97316; /* Color para negativo */
+            --color-neutral-orange:#f97316;
             --color-stat-row-bg:#f3f4f6
         }
         body{
@@ -45,6 +45,27 @@
         #actionSelect{color:var(--color-text-dark)!important}
         footer{padding:1.5rem 0;text-align:center;width:100%;max-w-5xl;margin-top:2rem;border-top:1px solid #e5e7eb;font-size:.875rem;color:#6b7280}
         footer strong{color:var(--color-text-dark);font-weight:500}
+
+        /* Estilo para el aviso automático (Toast) */
+        .toast-notification {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1f2937;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none;
+        }
+        .toast-visible {
+            opacity: 1;
+        }
     </style>
 </head>
 
@@ -145,40 +166,40 @@
                 j = document.getElementById('clearSetDataBtn'),
                 k = document.getElementById('clearGameDataBtn');
             
-            let l = [], // l: players
-                m = [], // m: actionLog - Log de acciones del JUEGO COMPLETO (ACUMULADO)
-                m_current_set = []; // Log de acciones del SET ACTUAL (Temporal para stats y borrado)
+            let l = [], m = [], m_current_set = [];
 
-            const n = { // n: scoreMap
+            const n = { 
                 'S# Servicio Positivo': 1, 'A# Ataque Positivo': 1, 'B# Bloqueo Positivo': 1, 
                 'R# Recepción Positiva': 1, 'C# Coloque Positivo': 1, 'D# Defensa Positiva': 1,
                 'S= Servicio Negativo': -1, 'A= Ataque Negativo': -1, 'B= Bloqueo Negativo': -1, 
                 'R= Recepción Negativo': -1, 'C= Coloque Negativo': -1, 'D= Defensa Negativa': -1
             },
-            o = { // o: actionTypes (solo las letras iniciales)
-                S: 'Servicio', A: 'Ataque', B: 'Bloqueo', R: 'Recepción', C: 'Coloque', D: 'Defensa'
-            },
-            p = { // p: colorMap
-                primaryBlue: '#0056FF', 
-                secondaryRed: '#dc2626', 
-                textDark: '#1f2937', 
-                cardBg: '#ffffff',
-                neutralOrange: '#f97316', // Usaremos este color para negativos
-                successGreen: '#10b981'
-            };
+            o = { S: 'Servicio', A: 'Ataque', B: 'Bloqueo', R: 'Recepción', C: 'Coloque', D: 'Defensa' },
+            p = { primaryBlue: '#0056FF', secondaryRed: '#dc2626', textDark: '#1f2937', cardBg: '#ffffff', neutralOrange: '#f97316', successGreen: '#10b981' };
 
-            // ----------------------------------------------------------------------
-            // FUNCIONES PRINCIPALES
-            // ----------------------------------------------------------------------
+            // --- FUNCIÓN PARA AVISO AUTOMÁTICO ---
+            function showAutoToast(message) {
+                const toast = document.createElement('div');
+                toast.className = 'toast-notification';
+                toast.textContent = message;
+                document.body.appendChild(toast);
 
-            // Guarda datos en localStorage
+                // Aparecer
+                setTimeout(() => toast.classList.add('toast-visible'), 10);
+
+                // Desaparecer después de 2 segundos
+                setTimeout(() => {
+                    toast.classList.remove('toast-visible');
+                    setTimeout(() => toast.remove(), 300);
+                }, 2000);
+            }
+
             function q() {
                 localStorage.setItem('volleyballPlayers', JSON.stringify(l));
                 localStorage.setItem('volleyballActionLog', JSON.stringify(m)); 
                 localStorage.setItem('volleyballCurrentSetLog', JSON.stringify(m_current_set)); 
             }
             
-            // Carga datos desde localStorage
             function r() {
                 const a = localStorage.getItem('volleyballPlayers');
                 a && (l = JSON.parse(a));
@@ -188,16 +209,12 @@
                 setLog && (m_current_set = JSON.parse(setLog));
             }
 
-            // Actualiza el estilo del select de acción
             function s() {
-                const a = e.options[e.selectedIndex],
-                    b = a ? a.value : null,
-                    c = b ? n[b] : 0;
+                const a = e.options[e.selectedIndex], b = a ? a.value : null, c = b ? n[b] : 0;
                 c > 0 ? e.style.borderColor = p.primaryBlue : c < 0 ? e.style.borderColor = p.secondaryRed : e.style.borderColor = '#d1d5db';
                 return c;
             }
 
-            // Llena el select de atletas (d)
             function populatePlayerSelect() {
                 d.innerHTML = '';
                 if (l.length === 0) {
@@ -213,7 +230,6 @@
                 });
             }
 
-            // Llena el select de acciones (e)
             function populateActionSelect() {
                 e.innerHTML = '';
                 Object.keys(n).forEach(action => {
@@ -222,432 +238,154 @@
                     option.textContent = action;
                     e.appendChild(option);
                 });
-                s(); // Establecer color inicial
+                s();
             }
-            
-            // ----------------------------------------------------------------------
-            // FUNCIONES DE ESTADÍSTICA
-            // ----------------------------------------------------------------------
-            
-            // 1. Estadísticas por Atleta (h) - Usa m_current_set
+
             function updateScoreContainer() {
                 h.innerHTML = ''; 
                 if (l.length === 0) {
                     h.innerHTML = '<p class="stat-row-text-dark text-center py-8">Aún no hay atletas. ¡Agrégalos para empezar!</p>';
                     return;
                 }
-                
                 const playerStats = {};
-                l.forEach(player => {
-                    playerStats[player.number] = { totalPos: 0, totalNeg: 0, efficiency: 0, differential: 0, totalActions: 0, actions: {} };
-                });
-
+                l.forEach(player => { playerStats[player.number] = { totalPos: 0, totalNeg: 0, efficiency: 0, differential: 0, totalActions: 0, actions: {} }; });
                 m_current_set.forEach(log => {
                     const stats = playerStats[log.playerNumber];
                     const score = n[log.action];
                     const quantity = log.quantity || 1;
                     const actionType = log.action.charAt(0); 
-
                     if (stats) {
-                        stats.totalActions += quantity; // Suma todas las acciones (Pos o Neg)
+                        stats.totalActions += quantity;
                         if (score > 0) stats.totalPos += quantity;
                         else if (score < 0) stats.totalNeg += quantity;
-
                         if (!stats.actions[actionType]) stats.actions[actionType] = { pos: 0, neg: 0 };
                         if (score > 0) stats.actions[actionType].pos += quantity;
                         else if (score < 0) stats.actions[actionType].neg += quantity;
                     }
                 });
-                
-                l.sort((p1, p2) => p1.number - p2.number);
                 l.forEach(player => {
                     const stats = playerStats[player.number];
                     const totalActions = stats.totalPos + stats.totalNeg;
-                    stats.differential = stats.totalPos - stats.totalNeg; // Diferencial Pos - Neg
+                    stats.differential = stats.totalPos - stats.totalNeg;
                     stats.efficiency = totalActions > 0 ? (stats.differential / totalActions) * 100 : 0;
-                    
                     let actionDetails = '';
                     Object.keys(o).forEach(key => {
                         const typeStats = stats.actions[key];
-                        if (typeStats) {
-                            actionDetails += `<span class="text-sm font-medium mr-3">${key}: <span class="score-positive">${typeStats.pos}</span> | <span class="score-neutral" style="color: ${p.neutralOrange};">${typeStats.neg}</span></span>`;
-                        }
+                        if (typeStats) actionDetails += `<span class="text-sm font-medium mr-3">${key}: <span class="score-positive">${typeStats.pos}</span> | <span class="score-neutral" style="color: ${p.neutralOrange};">${typeStats.neg}</span></span>`;
                     });
-
-                    // Determinamos el color para el diferencial neto
                     const differentialColor = stats.differential > 0 ? p.successGreen : (stats.differential < 0 ? p.secondaryRed : p.textDark);
-
                     h.innerHTML += `
                         <div class="stat-row-bg p-3 rounded-lg flex flex-col shadow-sm">
                             <div class="flex justify-between items-center mb-2">
                                 <div class="font-bold text-lg stat-row-text-dark">#${player.number} ${player.name}</div>
-                                <div class="text-right">
-                                    <span class="font-bold text-xl" style="color: ${stats.efficiency >= 0 ? p.successGreen : p.secondaryRed};">
-                                        ${stats.efficiency.toFixed(1)}%
-                                    </span>
-                                </div>
+                                <div class="text-right"><span class="font-bold text-xl" style="color: ${stats.efficiency >= 0 ? p.successGreen : p.secondaryRed};">${stats.efficiency.toFixed(1)}%</span></div>
                             </div>
-
                             <div class="flex justify-between text-sm py-1 border-b border-gray-300">
-                                <span class="font-semibold stat-row-text-dark">Acciones por tipo:</span>
-                                <div class="text-xs">${actionDetails || 'Sin acciones en este Set.'}</div>
+                                <span class="font-semibold stat-row-text-dark">Acciones:</span>
+                                <div class="text-xs">${actionDetails || 'Sin acciones.'}</div>
                             </div>
-                            
-                            <div class="flex justify-between text-sm py-1 border-b border-gray-300">
-                                <span class="font-semibold stat-row-text-dark">Total de Acciones:</span>
-                                <span class="font-semibold stat-row-text-dark">${stats.totalActions}</span>
-                            </div>
-
                             <div class="flex justify-between text-base pt-2">
-                                <span class="font-bold stat-row-text-dark">Diferencial Neto (P-N):</span>
-                                <span class="font-extrabold" style="color: ${differentialColor};">
-                                    ${stats.differential > 0 ? '+' : ''}${stats.differential}
-                                </span>
+                                <span class="font-bold stat-row-text-dark">Dif. Neto:</span>
+                                <span class="font-extrabold" style="color: ${differentialColor};">${stats.differential > 0 ? '+' : ''}${stats.differential}</span>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
             }
 
-            // 2. Estadística General por Equipo (i) - Usa m_current_set
             function updateGeneralStats() {
                 i.innerHTML = '';
                 if (m_current_set.length === 0) {
                     i.innerHTML = '<p class="stat-row-text-dark text-center py-8">Registra acciones para ver el resumen.</p>';
                     return;
                 }
-                
                 const teamStats = {};
-                let totalActions = 0;
-                let teamPos = 0;
-                let teamNeg = 0;
-
+                let totalActions = 0, teamPos = 0, teamNeg = 0;
                 m_current_set.forEach(log => {
-                    const score = n[log.action];
-                    const quantity = log.quantity || 1;
-                    const actionType = log.action.charAt(0);
-
+                    const score = n[log.action], quantity = log.quantity || 1, actionType = log.action.charAt(0);
                     if (!teamStats[actionType]) teamStats[actionType] = { pos: 0, neg: 0 };
-                    
-                    if (score > 0) {
-                        teamStats[actionType].pos += quantity;
-                        teamPos += quantity;
-                    } else if (score < 0) {
-                        teamStats[actionType].neg += quantity;
-                        teamNeg += quantity;
-                    }
+                    if (score > 0) { teamStats[actionType].pos += quantity; teamPos += quantity; }
+                    else if (score < 0) { teamStats[actionType].neg += quantity; teamNeg += quantity; }
                     totalActions += quantity;
                 });
-                
                 const totalEfficiency = totalActions > 0 ? ((teamPos - teamNeg) / totalActions) * 100 : 0;
-
-                let statsHtml = `
-                    <div class="flex justify-between items-center stat-row-bg p-3 rounded-lg font-bold">
-                        <span>Eficiencia Total del Equipo:</span>
-                        <span class="text-xl" style="color: ${totalEfficiency >= 0 ? p.successGreen : p.secondaryRed};">${totalEfficiency.toFixed(1)}%</span>
-                    </div>
-                `;
-
+                let statsHtml = `<div class="flex justify-between items-center stat-row-bg p-3 rounded-lg font-bold"><span>Eficiencia Equipo:</span><span class="text-xl" style="color: ${totalEfficiency >= 0 ? p.successGreen : p.secondaryRed};">${totalEfficiency.toFixed(1)}%</span></div>`;
                 Object.keys(o).forEach(key => {
                     const stats = teamStats[key];
                     if (stats) {
                         const typeTotal = stats.pos + stats.neg;
-                        const typeEfficiency = typeTotal > 0 ? ((stats.pos - stats.neg) / typeTotal) * 100 : 0;
-                        statsHtml += `
-                            <div class="p-3 border-b border-gray-200 flex justify-between stat-row-text-dark">
-                                <span>${o[key]} (${typeTotal} acciones):</span>
-                                <span><span class="score-positive">${stats.pos}</span> | <span class="score-neutral" style="color: ${p.neutralOrange};">${stats.neg}</span> | 
-                                    <span class="font-medium" style="color: ${typeEfficiency >= 0 ? p.primaryBlue : p.secondaryRed};">${typeEfficiency.toFixed(0)}%</span>
-                                </span>
-                            </div>
-                        `;
+                        const typeEff = typeTotal > 0 ? ((stats.pos - stats.neg) / typeTotal) * 100 : 0;
+                        statsHtml += `<div class="p-3 border-b border-gray-200 flex justify-between stat-row-text-dark"><span>${o[key]}:</span><span><span class="score-positive">${stats.pos}</span> | <span class="score-neutral" style="color: ${p.neutralOrange};">${stats.neg}</span> | <span class="font-medium" style="color: ${typeEff >= 0 ? p.primaryBlue : p.secondaryRed};">${typeEff.toFixed(0)}%</span></span></div>`;
                     }
                 });
-                
                 i.innerHTML = statsHtml;
             }
 
-            // 3. Gráfica de Barras (barChart) - Usa m_current_set (Barras Agrupadas, Set Actual)
             function updateBarChart() {
                 const actionTotals = {};
                 Object.keys(o).forEach(key => actionTotals[key] = { pos: 0, neg: 0 });
-
                 m_current_set.forEach(log => {
-                    const score = n[log.action];
-                    const quantity = log.quantity || 1;
-                    const actionType = log.action.charAt(0);
-                    
-                    if (actionTotals[actionType]) {
-                        if (score > 0) actionTotals[actionType].pos += quantity;
-                        else if (score < 0) actionTotals[actionType].neg += quantity;
-                    }
+                    const score = n[log.action], qty = log.quantity || 1, type = log.action.charAt(0);
+                    if (actionTotals[type]) { if (score > 0) actionTotals[type].pos += qty; else if (score < 0) actionTotals[type].neg += qty; }
                 });
-                
                 const labels = Object.values(o);
-                const positiveData = labels.map(label => actionTotals[Object.keys(o).find(key => o[key] === label)]?.pos || 0);
-                const negativeData = labels.map(label => actionTotals[Object.keys(o).find(key => o[key] === label)]?.neg || 0);
-
+                const posData = labels.map(l => actionTotals[Object.keys(o).find(k => o[k] === l)]?.pos || 0);
+                const negData = labels.map(l => actionTotals[Object.keys(o).find(k => o[k] === l)]?.neg || 0);
                 if (barChartInstance) barChartInstance.destroy();
-
                 const ctx = document.getElementById('barChart').getContext('2d');
-                barChartInstance = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                label: 'Acciones Positivas',
-                                data: positiveData,
-                                backgroundColor: p.primaryBlue,
-                                barPercentage: 0.8, 
-                                categoryPercentage: 0.9 
-                            },
-                            {
-                                label: 'Acciones Negativas',
-                                data: negativeData,
-                                backgroundColor: p.neutralOrange, 
-                                barPercentage: 0.8,
-                                categoryPercentage: 0.9
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: { stacked: false },
-                            y: { 
-                                stacked: false, 
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1, 
-                                    callback: function(value) {
-                                        if (Number.isInteger(value)) {
-                                            return value;
-                                        }
-                                    }
-                                } 
-                            }
-                        }
-                    }
-                });
+                barChartInstance = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Positivas', data: posData, backgroundColor: p.primaryBlue }, { label: 'Negativas', data: negData, backgroundColor: p.neutralOrange }] }, options: { responsive: true, maintainAspectRatio: false }});
             }
 
-
-            // 4. Gráfica de Barras Acumuladas (TOTALES POR ACCIÓN) - Usa m (Log de Juego Completo)
             function updateAccumulatedBarChart() {
                 const actionTotals = {};
-                let totalPositive = 0;
-                let totalNegative = 0;
-
+                let totalPos = 0, totalNeg = 0;
                 Object.keys(o).forEach(key => actionTotals[key] = { pos: 0, neg: 0 });
-
-                // USAMOS EL LOG COMPLETO (m)
                 m.forEach(log => {
-                    const score = n[log.action];
-                    const quantity = log.quantity || 1;
-                    const actionType = log.action.charAt(0);
-                    
-                    if (actionTotals[actionType]) {
-                        if (score > 0) {
-                            actionTotals[actionType].pos += quantity;
-                            totalPositive += quantity;
-                        } else if (score < 0) {
-                            actionTotals[actionType].neg += quantity;
-                            totalNegative += quantity;
-                        }
-                    }
+                    const score = n[log.action], qty = log.quantity || 1, type = log.action.charAt(0);
+                    if (actionTotals[type]) { if (score > 0) { actionTotals[type].pos += qty; totalPos += qty; } else if (score < 0) { actionTotals[type].neg += qty; totalNeg += qty; } }
                 });
-                
-                const labels = Object.values(o);
-                const positiveData = labels.map(label => actionTotals[Object.keys(o).find(key => o[key] === label)]?.pos || 0);
-                const negativeData = labels.map(label => actionTotals[Object.keys(o).find(key => o[key] === label)]?.neg || 0);
-
-                const totalActions = totalPositive + totalNegative;
-                const ctx = document.getElementById('accumulatedBarChart').getContext('2d');
-                const summaryDiv = document.getElementById('totalPointsSummary');
-                const chartContainer = document.getElementById('accumulatedBarChart');
-
-                if (totalActions === 0) {
-                    summaryDiv.innerHTML = 'No se han registrado acciones aún para las gráficas generales.';
-                    chartContainer.style.display = 'none';
-                    if (accumulatedBarChartInstance) {
-                        accumulatedBarChartInstance.destroy();
-                        accumulatedBarChartInstance = null;
-                    }
-                    return;
-                }
-
+                const labels = Object.values(o), posData = labels.map(l => actionTotals[Object.keys(o).find(k => o[k] === l)]?.pos || 0), negData = labels.map(l => actionTotals[Object.keys(o).find(k => o[k] === l)]?.neg || 0);
+                const totalActions = totalPos + totalNeg, ctx = document.getElementById('accumulatedBarChart').getContext('2d'), summaryDiv = document.getElementById('totalPointsSummary'), chartContainer = document.getElementById('accumulatedBarChart');
+                if (totalActions === 0) { summaryDiv.innerHTML = 'Sin acciones acumuladas.'; chartContainer.style.display = 'none'; if (accumulatedBarChartInstance) { accumulatedBarChartInstance.destroy(); accumulatedBarChartInstance = null; } return; }
                 chartContainer.style.display = 'block';
-
-                summaryDiv.innerHTML = `
-                    <p class="score-positive">Puntos Positivos Acumulados: ${totalPositive}</p>
-                    <p class="score-neutral" style="color: ${p.neutralOrange};">Puntos Negativos Acumulados: ${totalNegative}</p>
-                    <p class="stat-row-text-dark">Total de Acciones con Valor: ${totalActions}</p>
-                `;
-
-                if (accumulatedBarChartInstance) {
-                    accumulatedBarChartInstance.destroy();
-                }
-                
-                // Creamos la gráfica de barras detallada
-                accumulatedBarChartInstance = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels, 
-                        datasets: [
-                            {
-                                label: 'Acciones Positivas Acumuladas',
-                                data: positiveData,
-                                backgroundColor: p.primaryBlue,
-                                barPercentage: 0.8, 
-                                categoryPercentage: 0.9
-                            },
-                            {
-                                label: 'Acciones Negativas Acumuladas',
-                                data: negativeData,
-                                backgroundColor: p.neutralOrange, 
-                                barPercentage: 0.8,
-                                categoryPercentage: 0.9
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: { stacked: false },
-                            y: { 
-                                stacked: false, 
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1, 
-                                    callback: function(value) {
-                                        if (Number.isInteger(value)) {
-                                            return value;
-                                        }
-                                    }
-                                } 
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: { color: p.textDark, font: { size: 14, family: 'Inter' } }
-                            },
-                            title: {
-                                display: false 
-                            }
-                        }
-                    }
-                });
+                summaryDiv.innerHTML = `<p class="score-positive">Positivos: ${totalPos}</p><p class="score-neutral" style="color: ${p.neutralOrange};">Negativos: ${totalNeg}</p>`;
+                if (accumulatedBarChartInstance) accumulatedBarChartInstance.destroy();
+                accumulatedBarChartInstance = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Pos. Acumulado', data: posData, backgroundColor: p.primaryBlue }, { label: 'Neg. Acumulado', data: negData, backgroundColor: p.neutralOrange }] }, options: { responsive: true, maintainAspectRatio: false }});
             }
 
+            function updateAllStats() { updateScoreContainer(); updateGeneralStats(); updateBarChart(); updateAccumulatedBarChart(); }
 
-            // FUNCIÓN MAESTRA PARA ACTUALIZAR TODO
-            function updateAllStats() {
-                // Actualiza las estadísticas del SET ACTUAL
-                updateScoreContainer();
-                updateGeneralStats();
-                updateBarChart();
-                
-                // Actualiza las estadísticas ACUMULADAS del JUEGO
-                updateAccumulatedBarChart();
-            }
-            
-            // ----------------------------------------------------------------------
-            // MANEJADORES DE EVENTOS
-            // ----------------------------------------------------------------------
-
-            // Manejador para agregar atleta
             c.addEventListener('click', () => {
-                const number = parseInt(a.value.trim());
-                const name = b.value.trim();
-
-                if (isNaN(number) || number <= 0 || name === '') {
-                    alert('Por favor, ingresa un número y nombre de atleta válidos.');
-                    return;
-                }
-                if (l.some(player => player.number === number)) {
-                    alert(`El número ${number} ya está asignado a un atleta.`);
-                    a.focus();
-                    return;
-                }
-
+                const number = parseInt(a.value.trim()), name = b.value.trim();
+                if (isNaN(number) || name === '') { alert('Datos inválidos.'); return; }
+                if (l.some(p => p.number === number)) { alert('Número ya asignado.'); return; }
                 l.push({ number: number, name: name });
-                q(); 
-                populatePlayerSelect(); 
-                updateAllStats();
-                
-                a.value = '';
-                b.value = '';
-                alert(`Atleta #${number} (${name}) agregado con éxito.`);
+                q(); populatePlayerSelect(); updateAllStats(); a.value = ''; b.value = '';
+                showAutoToast(`Atleta #${number} agregado`);
             });
 
-            // Manejador para cambiar el color del select de acción al seleccionar
             e.addEventListener('change', s);
 
-            // Manejador para registrar acción
             g.addEventListener('submit', (event) => {
                 event.preventDefault();
-                const playerNumber = parseInt(d.value);
-                const action = e.value;
-                const quantity = parseInt(f.value) || 1;
-
-                if (!playerNumber) {
-                    alert('Por favor, selecciona un atleta.');
-                    return;
-                }
+                const playerNumber = parseInt(d.value), action = e.value, quantity = parseInt(f.value) || 1;
+                if (!playerNumber) { alert('Selecciona un atleta.'); return; }
+                const logEntry = { playerNumber: playerNumber, action: action, quantity: quantity, timestamp: new Date().toISOString() };
+                m.push(logEntry); m_current_set.push(logEntry);
+                q(); updateAllStats(); 
                 
-                const logEntry = {
-                    playerNumber: playerNumber,
-                    action: action,
-                    quantity: quantity,
-                    timestamp: new Date().toISOString()
-                };
-
-                // Registra la acción en ambos logs
-                m.push(logEntry); // Log Acumulado (Juego)
-                m_current_set.push(logEntry); // Log Temporal (Set Actual)
-
-                q(); 
-                updateAllStats(); 
-
-                alert(`Acción registrada: #${playerNumber} - ${action} (x${quantity})`);
+                // CAMBIO SOLICITADO: Aviso automático de 2 segundos sin botón aceptar
+                showAutoToast(`Acción registrada: #${playerNumber}`);
             });
 
-
-            // Manejador para el botón "Eliminar Datos del Set" (SOLO BORRA M_CURRENT_SET)
             j.addEventListener('click', () => {
-                if (confirm('¿Estás seguro de que deseas ELIMINAR los datos del SET? (Solo se borran las acciones del set actual, el acumulado del juego se mantiene)')) {
-                    m_current_set = []; // Borrar solo el log del set actual
-                    q(); 
-                    alert('Datos del set eliminados. El acumulado del juego se ha conservado.');
-                    updateAllStats(); 
-                }
+                if (confirm('¿Eliminar datos del SET?')) { m_current_set = []; q(); updateAllStats(); showAutoToast('Set reiniciado'); }
             });
 
-            // Manejador para el botón "Eliminar Datos del Juego" (BORRA TODO)
             k.addEventListener('click', () => {
-                if (confirm('¿Estás seguro de que deseas ELIMINAR TODOS los datos del JUEGO (log de acciones y jugadores)? Esta acción es irreversible.')) {
-                    l = []; // Borrar jugadores
-                    m = []; // Borrar log de juego
-                    m_current_set = []; // Borrar log del set
-                    q(); 
-                    window.location.reload(); 
-                }
+                if (confirm('¿ELIMINAR TODO EL JUEGO?')) { l = []; m = []; m_current_set = []; q(); window.location.reload(); }
             });
 
-
-            // ----------------------------------------------------------------------
-            // INICIALIZACIÓN
-            // ----------------------------------------------------------------------
-            
-            r(); // Cargar datos
-            populateActionSelect(); 
-            populatePlayerSelect(); 
-            updateAllStats(); 
-
+            r(); populateActionSelect(); populatePlayerSelect(); updateAllStats();
         });
     </script>
 </body>
