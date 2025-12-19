@@ -139,7 +139,7 @@
                     <canvas id="accumulatedBarChart"></canvas>
                 </div>
                 <div id="totalPointsSummary" class="text-center mt-4 text-lg font-semibold stat-row-text-dark">
-                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -177,17 +177,12 @@
             o = { S: 'Servicio', A: 'Ataque', B: 'Bloqueo', R: 'Recepción', C: 'Coloque', D: 'Defensa' },
             p = { primaryBlue: '#0056FF', secondaryRed: '#dc2626', textDark: '#1f2937', cardBg: '#ffffff', neutralOrange: '#f97316', successGreen: '#10b981' };
 
-            // --- FUNCIÓN PARA AVISO AUTOMÁTICO ---
             function showAutoToast(message) {
                 const toast = document.createElement('div');
                 toast.className = 'toast-notification';
                 toast.textContent = message;
                 document.body.appendChild(toast);
-
-                // Aparecer
                 setTimeout(() => toast.classList.add('toast-visible'), 10);
-
-                // Desaparecer después de 2 segundos
                 setTimeout(() => {
                     toast.classList.remove('toast-visible');
                     setTimeout(() => toast.remove(), 300);
@@ -253,7 +248,7 @@
                     const stats = playerStats[log.playerNumber];
                     const score = n[log.action];
                     const quantity = log.quantity || 1;
-                    const actionType = log.action.charAt(0); 
+                    const actionType = log.action.charAt(log.action.length - 2); 
                     if (stats) {
                         stats.totalActions += quantity;
                         if (score > 0) stats.totalPos += quantity;
@@ -301,7 +296,7 @@
                 const teamStats = {};
                 let totalActions = 0, teamPos = 0, teamNeg = 0;
                 m_current_set.forEach(log => {
-                    const score = n[log.action], quantity = log.quantity || 1, actionType = log.action.charAt(0);
+                    const score = n[log.action], quantity = log.quantity || 1, actionType = log.action.charAt(log.action.length - 2);
                     if (!teamStats[actionType]) teamStats[actionType] = { pos: 0, neg: 0 };
                     if (score > 0) { teamStats[actionType].pos += quantity; teamPos += quantity; }
                     else if (score < 0) { teamStats[actionType].neg += quantity; teamNeg += quantity; }
@@ -324,7 +319,7 @@
                 const actionTotals = {};
                 Object.keys(o).forEach(key => actionTotals[key] = { pos: 0, neg: 0 });
                 m_current_set.forEach(log => {
-                    const score = n[log.action], qty = log.quantity || 1, type = log.action.charAt(0);
+                    const score = n[log.action], qty = log.quantity || 1, type = log.action.charAt(log.action.length - 2);
                     if (actionTotals[type]) { if (score > 0) actionTotals[type].pos += qty; else if (score < 0) actionTotals[type].neg += qty; }
                 });
                 const labels = Object.values(o);
@@ -332,7 +327,26 @@
                 const negData = labels.map(l => actionTotals[Object.keys(o).find(k => o[k] === l)]?.neg || 0);
                 if (barChartInstance) barChartInstance.destroy();
                 const ctx = document.getElementById('barChart').getContext('2d');
-                barChartInstance = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Positivas', data: posData, backgroundColor: p.primaryBlue }, { label: 'Negativas', data: negData, backgroundColor: p.neutralOrange }] }, options: { responsive: true, maintainAspectRatio: false }});
+                barChartInstance = new Chart(ctx, { 
+                    type: 'bar', 
+                    data: { 
+                        labels: labels, 
+                        datasets: [
+                            { label: 'Positivas', data: posData, backgroundColor: p.primaryBlue }, 
+                            { label: 'Negativas', data: negData, backgroundColor: p.neutralOrange }
+                        ] 
+                    }, 
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { precision: 0 } // ELIMINA DECIMALES
+                            }
+                        }
+                    }
+                });
             }
 
             function updateAccumulatedBarChart() {
@@ -340,7 +354,7 @@
                 let totalPos = 0, totalNeg = 0;
                 Object.keys(o).forEach(key => actionTotals[key] = { pos: 0, neg: 0 });
                 m.forEach(log => {
-                    const score = n[log.action], qty = log.quantity || 1, type = log.action.charAt(0);
+                    const score = n[log.action], qty = log.quantity || 1, type = log.action.charAt(log.action.length - 2);
                     if (actionTotals[type]) { if (score > 0) { actionTotals[type].pos += qty; totalPos += qty; } else if (score < 0) { actionTotals[type].neg += qty; totalNeg += qty; } }
                 });
                 const labels = Object.values(o), posData = labels.map(l => actionTotals[Object.keys(o).find(k => o[k] === l)]?.pos || 0), negData = labels.map(l => actionTotals[Object.keys(o).find(k => o[k] === l)]?.neg || 0);
@@ -349,7 +363,26 @@
                 chartContainer.style.display = 'block';
                 summaryDiv.innerHTML = `<p class="score-positive">Positivos: ${totalPos}</p><p class="score-neutral" style="color: ${p.neutralOrange};">Negativos: ${totalNeg}</p>`;
                 if (accumulatedBarChartInstance) accumulatedBarChartInstance.destroy();
-                accumulatedBarChartInstance = new Chart(ctx, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Pos. Acumulado', data: posData, backgroundColor: p.primaryBlue }, { label: 'Neg. Acumulado', data: negData, backgroundColor: p.neutralOrange }] }, options: { responsive: true, maintainAspectRatio: false }});
+                accumulatedBarChartInstance = new Chart(ctx, { 
+                    type: 'bar', 
+                    data: { 
+                        labels: labels, 
+                        datasets: [
+                            { label: 'Pos. Acumulado', data: posData, backgroundColor: p.primaryBlue }, 
+                            { label: 'Neg. Acumulado', data: negData, backgroundColor: p.neutralOrange }
+                        ] 
+                    }, 
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { precision: 0 } // ELIMINA DECIMALES
+                            }
+                        }
+                    }
+                });
             }
 
             function updateAllStats() { updateScoreContainer(); updateGeneralStats(); updateBarChart(); updateAccumulatedBarChart(); }
@@ -372,8 +405,6 @@
                 const logEntry = { playerNumber: playerNumber, action: action, quantity: quantity, timestamp: new Date().toISOString() };
                 m.push(logEntry); m_current_set.push(logEntry);
                 q(); updateAllStats(); 
-                
-                // CAMBIO SOLICITADO: Aviso automático de 2 segundos sin botón aceptar
                 showAutoToast(`Acción registrada: #${playerNumber}`);
             });
 
