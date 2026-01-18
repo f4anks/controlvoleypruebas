@@ -1,41 +1,23 @@
 {
-  "name": "¡Control Voley!",
-  "short_name": "Control Voley!",
+  "name": "Control Voley Gestión",
+  "short_name": "CtrlVoley",
+  "description": "Sistema de gestión para clubes de Voleibol",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f0f8ff",
+  "theme_color": "#001F3F",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "/img/icons/apple-touch-icon-48x48.png",
+      "src": "img/icon-192.png",
+      "sizes": "192x192",
       "type": "image/png",
-      "sizes": "48x48"
+      "purpose": "any maskable"
     },
     {
-      "src": "/img/icons/apple-touch-icon-144x144.png",
-      "type": "image/png",
-      "sizes": "144x144"
-    },
-    {
-      "src": "/img/icons/apple-touch-icon-192x192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "/img/icons/apple-touch-icon-256x256.png",
-      "type": "image/png",
-      "sizes": "256x256"
-    },
-    {
-      "src": "/img/icons/apple-touch-icon-384x384.png",
-      "type": "image/png",
-      "sizes": "384x384"
-    },
-    {
-      "src": "/img/icons/apple-touch-icon-512x512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "src": "img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
-  ],
-  "start_url": "/index.html",
-  "display": "standalone",
-  "background_color": "#fff",
-  "theme_color": "#ee0979",
-  "description": "Testeando PWA"
+  ]
 }
