@@ -111,6 +111,17 @@
                         <input type="number" id="nroCamiseta" min="0" max="99" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
                     </div>
                 </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label for="peso" class="block text-sm font-medium text-gray-700">Peso (kg) <span class="text-gray-400 text-xs">(Opcional)</span></label>
+                        <input type="number" id="peso" step="0.1" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico" placeholder="Ej: 65.5">
+                    </div>
+                    <div>
+                        <label for="talla" class="block text-sm font-medium text-gray-700">Talla (cm) <span class="text-gray-400 text-xs">(Opcional)</span></label>
+                        <input type="number" id="talla" step="0.1" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico" placeholder="Ej: 175">
+                    </div>
+                </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
                     <div>
@@ -197,7 +208,6 @@
         let sortDirection = 'asc';
 
         const athletesTableBody = document.getElementById('athletesTableBody');
-        const loadingRow = document.getElementById('loadingRow');
 
         async function getTeamId(uid) {
             try {
@@ -212,9 +222,7 @@
             const lastPayment = new Date(fecha);
             const today = new Date();
             const diffDays = Math.round((today - lastPayment) / (1000 * 60 * 60 * 24));
-            
             const limit = (frecuencia === 'quincenal') ? 15 : 30;
-
             if (diffDays <= limit) return { status: 'Solvente', class: 'bg-green-100 text-green-800' };
             return { status: 'Insolvente', class: 'bg-yellow-100 text-yellow-800' };
         }
@@ -256,6 +264,9 @@
                 fechaNacimiento: document.getElementById('fechaNacimiento').value,
                 categoria: document.getElementById('categoria').value,
                 nroCamiseta: parseInt(document.getElementById('nroCamiseta').value) || 0,
+                // Captura de nuevos campos (si están vacíos guarda null o 0)
+                peso: parseFloat(document.getElementById('peso').value) || null,
+                talla: parseFloat(document.getElementById('talla').value) || null,
                 tipoNomina: document.getElementById('tipoNomina').value,
                 frecuenciaPago: document.getElementById('frecuenciaPago').value,
                 montoPago: parseFloat(document.getElementById('montoPago').value) || 0,
@@ -287,12 +298,24 @@
             document.getElementById('fechaNacimiento').value = a.fechaNacimiento;
             document.getElementById('categoria').value = a.categoria;
             document.getElementById('nroCamiseta').value = a.nroCamiseta;
+            // Cargar nuevos campos al editar
+            document.getElementById('peso').value = a.peso || '';
+            document.getElementById('talla').value = a.talla || '';
             document.getElementById('tipoNomina').value = a.tipoNomina;
             document.getElementById('frecuenciaPago').value = a.frecuenciaPago || 'mensual';
             document.getElementById('montoPago').value = a.montoPago || 0;
             document.getElementById('fechaUltimoPago').value = a.fechaUltimoPago || '';
             document.getElementById('formTitle').textContent = 'Editar Atleta';
             window.scrollTo(0,0);
+        };
+
+        window.deleteAthlete = async function(id, nombre, event) {
+            if (confirm(`¿Está seguro de eliminar al atleta ${nombre}?`)) {
+                try {
+                    await deleteDoc(doc(db, ATHLETES_COLLECTION_NAME, id));
+                    alert('Atleta eliminado');
+                } catch (e) { alert("Error: " + e.message); }
+            }
         };
 
         window.resetForm = () => {
