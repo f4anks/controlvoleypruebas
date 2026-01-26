@@ -35,13 +35,6 @@
             color: white;
             text-align: left;
         }
-        .sortable-header {
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        .sortable-header:hover {
-            color: #ccc;
-        }
     </style>
 </head>
 <body>
@@ -50,7 +43,7 @@
     <div class="container mx-auto p-4 md:p-8">
         
         <header class="mb-8 flex justify-between items-center border-b pb-4">
-            <a href="index_menu.html" class="text-gray-600 hover:text-azul-electrico transition p-2 absolute left-0 md:static">
+            <a href="index_menu.html" class="text-gray-600 hover:text-azul-electrico transition p-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
                 </svg>
@@ -72,90 +65,79 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre(s)</label>
-                        <input type="text" id="nombre" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
+                        <label class="block text-sm font-medium text-gray-700">Nombre(s)</label>
+                        <input type="text" id="nombre" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                     <div>
-                        <label for="apellido" class="block text-sm font-medium text-gray-700">Apellido(s)</label>
-                        <input type="text" id="apellido" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
+                        <label class="block text-sm font-medium text-gray-700">Apellido(s)</label>
+                        <input type="text" id="apellido" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                     <div>
-                        <label for="cedulaIdentidad" class="block text-sm font-medium text-gray-700">Cédula de Identidad</label>
-                        <input type="text" id="cedulaIdentidad" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
+                        <label class="block text-sm font-medium text-gray-700">Cédula de Identidad</label>
+                        <input type="text" id="cedulaIdentidad" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                     <div>
-                        <label for="telefono" class="block text-sm font-medium text-gray-700">Teléfono</label>
-                        <input type="number" id="telefono" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico" placeholder="Ej: 0412xxxxxxx">
+                        <label class="block text-sm font-medium text-gray-700">Teléfono</label>
+                        <input type="number" id="telefono" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                     <div>
-                        <label for="fechaNacimiento" class="block text-sm font-medium text-gray-700">Fecha Nacimiento</label>
-                        <input type="date" id="fechaNacimiento" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
+                        <label class="block text-sm font-medium text-gray-700">Fecha Nacimiento</label>
+                        <input type="date" id="fechaNacimiento" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                     <div>
-                        <label for="categoria" class="block text-sm font-medium text-gray-700">Categoría</label>
-                        <select id="categoria" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
+                        <label class="block text-sm font-medium text-gray-700">Categoría</label>
+                        <select id="categoria" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                             <option value="" disabled selected>Seleccione</option>
-                            <option value="U9">U9</option>
-                            <option value="U11">U11</option>
-                            <option value="U13">U13</option>
-                            <option value="U15">U15</option>
-                            <option value="U19">U19</option>
-                            <option value="Master">Master</option>
+                            <option value="U9">U9</option><option value="U11">U11</option><option value="U13">U13</option>
+                            <option value="U15">U15</option><option value="U19">U19</option><option value="Master">Master</option>
                         </select>
                     </div>
                     <div>
-                        <label for="nroCamiseta" class="block text-sm font-medium text-gray-700">Nro Camiseta</label>
-                        <input type="number" id="nroCamiseta" min="0" max="99" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
+                        <label class="block text-sm font-medium text-gray-700">Nro Camiseta</label>
+                        <input type="number" id="nroCamiseta" min="0" max="99" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div>
-                        <label for="peso" class="block text-sm font-medium text-gray-700">Peso (kg) <span class="text-gray-400 text-xs">(Opcional)</span></label>
-                        <input type="number" id="peso" step="0.1" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico" placeholder="Ej: 65.5">
+                        <label class="block text-sm font-medium text-gray-700">Peso (kg) <span class="text-xs text-gray-400">(Opcional)</span></label>
+                        <input type="number" id="peso" step="0.1" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                     <div>
-                        <label for="talla" class="block text-sm font-medium text-gray-700">Talla (cm) <span class="text-gray-400 text-xs">(Opcional)</span></label>
-                        <input type="number" id="talla" step="0.1" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico" placeholder="Ej: 175">
+                        <label class="block text-sm font-medium text-gray-700">Talla (cm) <span class="text-xs text-gray-400">(Opcional)</span></label>
+                        <input type="number" id="talla" step="0.1" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
                     <div>
-                        <label for="tipoNomina" class="block text-sm font-medium text-gray-700">Estatus</label>
-                        <select id="tipoNomina" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
-                            <option value="activo">Activo</option>
-                            <option value="reposo">Reposo</option>
-                            <option value="suspendido">Suspendido</option>
+                        <label class="block text-sm font-medium text-gray-700">Estatus</label>
+                        <select id="tipoNomina" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
+                            <option value="activo">Activo</option><option value="reposo">Reposo</option><option value="suspendido">Suspendido</option>
                         </select>
                     </div>
                     <div>
-                        <label for="frecuenciaPago" class="block text-sm font-medium text-gray-700">Frecuencia de Pago</label>
-                        <select id="frecuenciaPago" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
-                            <option value="mensual">Mensual</option>
-                            <option value="quincenal">Quincenal</option>
+                        <label class="block text-sm font-medium text-gray-700">Frecuencia Pago</label>
+                        <select id="frecuenciaPago" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
+                            <option value="mensual">Mensual</option><option value="quincenal">Quincenal</option>
                         </select>
                     </div>
                     <div>
-                        <label for="montoPago" class="block text-sm font-medium text-gray-700">Monto Nómina</label>
-                        <input type="number" id="montoPago" step="0.01" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
+                        <label class="block text-sm font-medium text-gray-700">Monto Nómina</label>
+                        <input type="number" id="montoPago" step="0.01" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                     <div>
-                        <label for="fechaUltimoPago" class="block text-sm font-medium text-gray-700">Último Pago</label>
-                        <input type="date" id="fechaUltimoPago" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-azul-electrico focus:border-azul-electrico">
+                        <label class="block text-sm font-medium text-gray-700">Último Pago</label>
+                        <input type="date" id="fechaUltimoPago" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                 </div>
                 
                 <div class="flex space-x-4 mt-6">
-                    <button type="submit" id="submitButton" class="py-2 px-4 azul-marino-bg text-white font-semibold rounded-lg shadow-md hover:bg-blue-900 transition duration-200">
-                        Guardar Atleta
-                    </button>
-                    <button type="button" onclick="resetForm()" class="py-2 px-4 bg-gray-300 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-400 transition duration-200">
-                        Nuevo / Cancelar
-                    </button>
+                    <button type="submit" class="py-2 px-4 azul-marino-bg text-white font-semibold rounded-lg shadow-md hover:bg-blue-900 transition duration-200">Guardar Atleta</button>
+                    <button type="button" onclick="resetForm()" class="py-2 px-4 bg-gray-300 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-400 transition duration-200">Nuevo / Cancelar</button>
                 </div>
             </form>
         </div>
@@ -165,19 +147,17 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="table-header">
                     <tr>
-                        <th onclick="sortAthletes('nombre')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">Nombre</th>
+                        <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider">Nombre</th>
                         <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider">Cédula</th>
                         <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider">Cat.</th>
                         <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider">Estatus</th>
-                        <th onclick="sortAthletes('frecuenciaPago')" class="px-6 py-3 text-xs font-medium uppercase tracking-wider sortable-header">Frecuencia</th>
+                        <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider">Frecuencia</th>
                         <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider">Solvencia</th>
                         <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="athletesTableBody" class="bg-white divide-y divide-gray-200">
-                    <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500" id="loadingRow">Cargando atletas...</td>
-                    </tr>
+                    <tr><td colspan="7" class="px-6 py-4 text-center text-gray-500" id="loadingRow">Cargando atletas...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -204,67 +184,53 @@
 
         let teamId = null;
         let currentAthletes = []; 
-        let sortKey = 'nombre';
-        let sortDirection = 'asc';
-
-        const athletesTableBody = document.getElementById('athletesTableBody');
 
         async function getTeamId(uid) {
             try {
-                const userDocRef = doc(db, "users", uid); 
-                const docSnap = await getDoc(userDocRef);
-                return (docSnap.exists() && docSnap.data().teamId) ? docSnap.data().teamId : null;
+                const docSnap = await getDoc(doc(db, "users", uid));
+                return docSnap.exists() ? docSnap.data().teamId : null;
             } catch (e) { return null; }
         }
 
         function calculateSolvencyStatus(fecha, frecuencia) {
             if (!fecha) return { status: 'Insolvente', class: 'bg-red-100 text-red-800' };
-            const lastPayment = new Date(fecha);
-            const today = new Date();
-            const diffDays = Math.round((today - lastPayment) / (1000 * 60 * 60 * 24));
-            const limit = (frecuencia === 'quincenal') ? 15 : 30;
-            if (diffDays <= limit) return { status: 'Solvente', class: 'bg-green-100 text-green-800' };
-            return { status: 'Insolvente', class: 'bg-yellow-100 text-yellow-800' };
+            const diffDays = Math.round((new Date() - new Date(fecha)) / (1000 * 60 * 60 * 24));
+            const limit = frecuencia === 'quincenal' ? 15 : 30;
+            return diffDays <= limit ? { status: 'Solvente', class: 'bg-green-100 text-green-800' } : { status: 'Insolvente', class: 'bg-yellow-100 text-yellow-800' };
         }
 
         function renderAthletesTable(athletes) {
-            athletesTableBody.innerHTML = '';
-            if (athletes.length === 0) {
-                athletesTableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center">Sin registros.</td></tr>';
-                return;
-            }
-
-            athletes.forEach(athlete => {
-                const solvency = calculateSolvencyStatus(athlete.fechaUltimoPago, athlete.frecuenciaPago);
-                const row = `
+            const tbody = document.getElementById('athletesTableBody');
+            tbody.innerHTML = athletes.length ? '' : '<tr><td colspan="7" class="px-6 py-4 text-center">Sin registros.</td></tr>';
+            athletes.forEach(a => {
+                const s = calculateSolvencyStatus(a.fechaUltimoPago, a.frecuenciaPago);
+                tbody.insertAdjacentHTML('beforeend', `
                     <tr class="hover:bg-gray-50 transition">
-                        <td class="px-6 py-4 whitespace-nowrap">${athlete.nombre} ${athlete.apellido}</td>
-                        <td class="px-6 py-4">${athlete.cedulaIdentidad}</td>
-                        <td class="px-6 py-4">${athlete.categoria}</td>
-                        <td class="px-6 py-4"><span class="px-2 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">${athlete.tipoNomina}</span></td>
-                        <td class="px-6 py-4 uppercase text-xs font-bold">${athlete.frecuenciaPago || 'mensual'}</td>
-                        <td class="px-6 py-4"><span class="px-2 text-xs font-semibold rounded-full ${solvency.class}">${solvency.status}</span></td>
+                        <td class="px-6 py-4">${a.nombre} ${a.apellido}</td>
+                        <td class="px-6 py-4">${a.cedulaIdentidad}</td>
+                        <td class="px-6 py-4">${a.categoria}</td>
+                        <td class="px-6 py-4"><span class="px-2 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">${a.tipoNomina}</span></td>
+                        <td class="px-6 py-4 uppercase text-xs font-bold">${a.frecuenciaPago || 'mensual'}</td>
+                        <td class="px-6 py-4"><span class="px-2 text-xs font-semibold rounded-full ${s.class}">${s.status}</span></td>
                         <td class="px-6 py-4 text-sm font-medium space-x-2">
-                            <button onclick="editAthlete('${athlete.id}', event)" class="text-indigo-600 hover:underline">Editar</button>
-                            <button onclick="deleteAthlete('${athlete.id}', '${athlete.nombre}', event)" class="text-red-600 hover:underline">Eliminar</button>
+                            <button onclick="editAthlete('${a.id}')" class="text-indigo-600 hover:underline">Editar</button>
+                            <button onclick="deleteAthlete('${a.id}', '${a.nombre}')" class="text-red-600 hover:underline">Eliminar</button>
                         </td>
-                    </tr>`;
-                athletesTableBody.insertAdjacentHTML('beforeend', row);
+                    </tr>`);
             });
         }
 
-        window.handleFormSubmit = async function(event) {
-            event.preventDefault();
-            const athleteId = document.getElementById('athleteId').value;
-            const athleteData = {
+        window.handleFormSubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('athleteId').value;
+            const data = {
                 nombre: document.getElementById('nombre').value.trim(),
                 apellido: document.getElementById('apellido').value.trim(),
                 cedulaIdentidad: document.getElementById('cedulaIdentidad').value.trim(),
-                telefono: document.getElementById('telefono').value.trim(),
+                telefono: document.getElementById('telefono').value,
                 fechaNacimiento: document.getElementById('fechaNacimiento').value,
                 categoria: document.getElementById('categoria').value,
                 nroCamiseta: parseInt(document.getElementById('nroCamiseta').value) || 0,
-                // Captura de nuevos campos (si están vacíos guarda null o 0)
                 peso: parseFloat(document.getElementById('peso').value) || null,
                 talla: parseFloat(document.getElementById('talla').value) || null,
                 tipoNomina: document.getElementById('tipoNomina').value,
@@ -274,20 +240,13 @@
                 clubId: teamId,
                 updatedAt: new Date().toISOString()
             };
-
             try {
-                if (athleteId) {
-                    await updateDoc(doc(db, ATHLETES_COLLECTION_NAME, athleteId), athleteData);
-                } else {
-                    athleteData.createdAt = new Date().toISOString();
-                    await addDoc(collection(db, ATHLETES_COLLECTION_NAME), athleteData);
-                }
-                alert('Operación exitosa');
-                resetForm();
-            } catch (e) { alert("Error: " + e.message); }
+                id ? await updateDoc(doc(db, ATHLETES_COLLECTION_NAME, id), data) : await addDoc(collection(db, ATHLETES_COLLECTION_NAME), {...data, createdAt: new Date().toISOString()});
+                alert('Éxito'); resetForm();
+            } catch (err) { alert(err.message); }
         };
 
-        window.editAthlete = function(id, event) {
+        window.editAthlete = (id) => {
             const a = currentAthletes.find(x => x.id === id);
             if (!a) return;
             document.getElementById('athleteId').value = a.id;
@@ -298,23 +257,22 @@
             document.getElementById('fechaNacimiento').value = a.fechaNacimiento;
             document.getElementById('categoria').value = a.categoria;
             document.getElementById('nroCamiseta').value = a.nroCamiseta;
-            // Cargar nuevos campos al editar
             document.getElementById('peso').value = a.peso || '';
             document.getElementById('talla').value = a.talla || '';
             document.getElementById('tipoNomina').value = a.tipoNomina;
-            document.getElementById('frecuenciaPago').value = a.frecuenciaPago || 'mensual';
-            document.getElementById('montoPago').value = a.montoPago || 0;
+            document.getElementById('frecuenciaPago').value = a.frecuenciaPago;
+            document.getElementById('montoPago').value = a.montoPago;
             document.getElementById('fechaUltimoPago').value = a.fechaUltimoPago || '';
             document.getElementById('formTitle').textContent = 'Editar Atleta';
             window.scrollTo(0,0);
         };
 
-        window.deleteAthlete = async function(id, nombre, event) {
-            if (confirm(`¿Está seguro de eliminar al atleta ${nombre}?`)) {
+        window.deleteAthlete = async (id, nombre) => {
+            if (confirm(`¿Eliminar a ${nombre}?`)) {
                 try {
                     await deleteDoc(doc(db, ATHLETES_COLLECTION_NAME, id));
-                    alert('Atleta eliminado');
-                } catch (e) { alert("Error: " + e.message); }
+                    alert('Eliminado');
+                } catch (err) { alert(err.message); }
             }
         };
 
