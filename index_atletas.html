@@ -66,19 +66,19 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Nombre(s)</label>
-                        <input type="text" id="nombre" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
+                        <input type="text" id="nombre" required placeholder="Ej: Juan José" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Apellido(s)</label>
-                        <input type="text" id="apellido" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
+                        <input type="text" id="apellido" required placeholder="Ej: Pérez Castro" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Cédula de Identidad</label>
-                        <input type="text" id="cedulaIdentidad" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
+                        <input type="number" id="cedulaIdentidad" required placeholder="Ejemplo: 32445122" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Teléfono</label>
-                        <input type="number" id="telefono" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
+                        <input type="number" id="telefono" required placeholder="Ejemplo: 04245451211" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                 </div>
 
@@ -97,18 +97,18 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Nro Camiseta</label>
-                        <input type="number" id="nroCamiseta" min="0" max="99" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
+                        <input type="number" id="nroCamiseta" min="0" max="99" placeholder="00" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Peso (kg) <span class="text-xs text-gray-400">(Opcional)</span></label>
-                        <input type="number" id="peso" step="0.1" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
+                        <input type="number" id="peso" step="0.01" placeholder="Ejemplo: 50.30" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Talla (cm) <span class="text-xs text-gray-400">(Opcional)</span></label>
-                        <input type="number" id="talla" step="0.1" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
+                        <label class="block text-sm font-medium text-gray-700">Talla (cm) <span class="text-xs text-gray-400">(Sin decimales)</span></label>
+                        <input type="number" id="talla" step="1" oninput="this.value = Math.floor(this.value)" placeholder="Ejemplo: 162" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                 </div>
                 
@@ -127,7 +127,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Monto Nómina</label>
-                        <input type="number" id="montoPago" step="0.01" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
+                        <input type="number" id="montoPago" step="0.01" required placeholder="0.00" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Último Pago</label>
@@ -232,7 +232,7 @@
                 categoria: document.getElementById('categoria').value,
                 nroCamiseta: parseInt(document.getElementById('nroCamiseta').value) || 0,
                 peso: parseFloat(document.getElementById('peso').value) || null,
-                talla: parseFloat(document.getElementById('talla').value) || null,
+                talla: parseInt(document.getElementById('talla').value) || null,
                 tipoNomina: document.getElementById('tipoNomina').value,
                 frecuenciaPago: document.getElementById('frecuenciaPago').value,
                 montoPago: parseFloat(document.getElementById('montoPago').value) || 0,
@@ -268,11 +268,13 @@
         };
 
         window.deleteAthlete = async (id, nombre) => {
-            if (confirm(`¿Eliminar a ${nombre}?`)) {
+            if (confirm(`¿Está seguro de eliminar al atleta ${nombre}?`)) {
                 try {
                     await deleteDoc(doc(db, ATHLETES_COLLECTION_NAME, id));
-                    alert('Eliminado');
-                } catch (err) { alert(err.message); }
+                    alert('Atleta eliminado correctamente');
+                } catch (e) {
+                    alert("Error al eliminar: " + e.message);
+                }
             }
         };
 
