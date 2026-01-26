@@ -8,7 +8,6 @@
     <script>
         // 1. Bloquear F12 (código de tecla 123)
         document.onkeydown = function(e) {
-            // e.keyCode == 123 es F12
             if (e.keyCode == 123) {
                 e.preventDefault();
                 return false;
@@ -39,15 +38,14 @@
         .azul-electrico-text { color: var(--color-azul-electrico); }
         .rounded-xl { border-radius: 0.75rem; }
         
-        /* --- ESTILOS DE REFLEJO Y GLOW (COPIA DEL INDEX) --- */
+        /* --- ESTILOS DE REFLEJO Y GLOW --- */
         .shadow-glow-azul {
-            /* Sombra de caja normal + sombra que simula el resplandor */
             box-shadow: 0 4px 10px rgba(0, 31, 63, 0.2), 
-                        0 0 20px rgba(0, 116, 217, 0.35); /* Azul Eléctrico para el glow */
-            border: 1px solid rgba(0, 116, 217, 0.2); /* Borde sutil azul */
+                        0 0 20px rgba(0, 116, 217, 0.35); 
+            border: 1px solid rgba(0, 116, 217, 0.2); 
         }
 
-        /* Estilo para el BANNER (Altura ajustada a 250px) */
+        /* Estilo para el BANNER */
         .banner-header {
             background-image: url('img/banner.png'); 
             background-size: cover; 
@@ -57,16 +55,15 @@
             width: 100%;
         }
         
-        /* Estilo para las tarjetas del menú (COMBINADO CON GLOW) */
+        /* Estilo para las tarjetas del menú */
         .menu-card {
             transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
-            border-left: 4px solid var(--color-azul-electrico); /* Mantener el borde azul a la izquierda */
+            border-left: 4px solid var(--color-azul-electrico); 
         }
         .menu-card:hover {
             transform: translateY(-5px);
-            /* Aumentar el glow y el borde al pasar el ratón */
             box-shadow: 0 10px 25px rgba(0, 31, 63, 0.3), 
-                        0 0 35px rgba(0, 116, 217, 0.6); /* Más intenso al hacer hover */
+                        0 0 35px rgba(0, 116, 217, 0.6); 
             border-color: var(--color-azul-marino); 
         }
     </style>
@@ -108,7 +105,7 @@
                 </svg>
                 <div>
                     <h2 class="text-xl font-bold text-gray-800">Fichas Técnicas</h2>
-                    <p class="text-gray-600 text-sm">Consulta de datos físicos y de pago por atleta.</p>
+                    <p class="text-gray-600 text-sm">Consulta de datos físicos y de pago.</p>
                 </div>
             </a>
 
@@ -122,7 +119,7 @@
                 </div>
             </a>
 
-            <a href="estad/index_estad.html" class="menu-card bg-white p-6 rounded-xl shadow-glow-azul flex items-center space-x-4">
+            <a href="http://estad.controlvoley.com/" target="_blank" rel="noopener noreferrer" class="menu-card bg-white p-6 rounded-xl shadow-glow-azul flex items-center space-x-4">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-azul-electrico" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-6v6m-4-2v4m-2-4h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
@@ -136,13 +133,10 @@
     </div>
 
     <script type="module">
-        // --- Importaciones de Firebase ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // Añadida importación de Firestore, aunque no se use activamente aquí, para completar la configuración.
         import { getFirestore } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"; 
         
-        // --- Configuración de Firebase ---
         const firebaseConfig = { 
             apiKey: "AIzaSyB5RB7mm1j-0gjCNTUEJTkyEqLjyZ3C7ws",
             authDomain: "datacontrolvoley-ff556.firebaseapp.com",
@@ -154,29 +148,22 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app); // Inicialización de Firestore
+        const db = getFirestore(app); 
         
         const userUidDisplay = document.getElementById('userUidDisplay');
 
-        // Función de autenticación al cargar la página
         onAuthStateChanged(auth, (user) => { 
             if (user) {
-                // Si hay usuario autenticado, mostrar su UID
                 userUidDisplay.textContent = user.uid;
-                // Opcionalmente, podrías buscar aquí el 'teamId' para mostrarlo también si lo necesitaras.
             } else {
-                // Si no hay usuario logueado en Firebase Auth, redirigir
                 console.log("Sesión no encontrada. Redirigiendo a index.html");
                 window.location.href = 'index.html'; 
             }
         });
 
-        // Función para cerrar sesión
         window.logout = async function() {
             try {
                 await signOut(auth);
-                // Aunque el uso de localStorage para el club se desaconsejó, lo dejo por si lo tienes en otros archivos.
-                // En el flujo actual, teamId se lee de Firestore al iniciar index_atletas.html
                 localStorage.removeItem('currentClub'); 
                 window.location.href = 'index.html';
             } catch (error) {
@@ -184,6 +171,5 @@
             }
         }
     </script>
-
 </body>
 </html>
