@@ -1,23 +1,24 @@
 {
-  "name": "Control Voley Gestión",
-  "short_name": "CtrlVoley",
-  "description": "Sistema de gestión para clubes de Voleibol",
-  "start_url": "index.html",
+  "name": "Control Voley Stats",
+  "short_name": "CV Stats",
+  "description": "Sistema de estadísticas para voleibol - Modo Offline",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f0f8ff",
-  "theme_color": "#001F3F",
   "orientation": "portrait",
+  "background_color": "#F7F8FA",
+  "theme_color": "#0056FF",
   "icons": [
     {
-      "src": "img/icon-192.png",
+      "src": "./img/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "img/icon-512.png",
+      "src": "./img/logo.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
